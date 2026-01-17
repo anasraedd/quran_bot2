@@ -1,0 +1,320 @@
+const TelegramBot = require('node-telegram-bot-api');
+const Database = require('better-sqlite3');
+
+// ضع توكن البوت هنا
+const TOKEN = '7713309109:AAGHzUo4II7qhzTKCsrO33cQ-2x0GTupQq0';
+// ضع معرفك هنا
+const OWNER_ID = 7459198377;
+
+// إنشاء البوت
+const bot = new TelegramBot(TOKEN, { polling: true });
+
+// إنشاء قاعدة البيانات
+const db = new Database('bot_data.db');
+
+// إنشاء الجدول
+db.exec(`
+  CREATE TABLE IF NOT EXISTS achievements (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    username TEXT,
+    type TEXT,
+    surah TEXT,
+    start_ayah INTEGER,
+    end_ayah INTEGER,
+    details TEXT,
+    status TEXT,
+    rating INTEGER,
+    notes TEXT,
+    created_at TEXT
+  )
+`);
+
+// تخزين البيانات المؤقتة للمستخدمين
+const userStates = {};
+
+// أمر /start
+bot.onText(/\/start/, (msg) => {
+  const chatId = msg.chat.id;
+  
+  bot.sendMessage(chatId, 'مرحباً بك! اضغط على الزر لإضافة إنجازك اليومي:', {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: '➕ إضافة إنجاز', callback_data: 'add_achievement' }]
+      ]
+    }
+  });
+});
+
+// معالجة الأزرار
+bot.on('callback_query', async (query) => {
+  const chatId = query.message.chat.id;
+  const messageId = query.message.message_id;
+  const data = query.data;
+  
+  // الإجابة على الضغطة
+  bot.answerCallbackQuery(query.id);
+  
+  // إضافة إنجاز
+  if (data === 'add_achievement') {
+    bot.editMessageText('اختر نوع الإنجاز:', {
+      chat_id: chatId,
+      message_id: messageId,
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: '📖 حفظ جديد', callback_data: 'type_حفظ_جديد' }],
+          [{ text: '🔄 مراجعة قريبة', callback_data: 'type_مراجعة_قريبة' }],
+          [{ text: '📚 مراجعة بعيدة', callback_data: 'type_مراجعة_بعيدة' }],
+          [{ text: '👨‍🏫 تعليم', callback_data: 'type_تعليم' }]
+        ]
+      }
+    });
+  }
+  
+  // اختيار نوع الإنجاز
+  else if (data.startsWith('type_')) {
+    const type = data.replace('type_', '');
+    userStates[chatId] = { type: type };
+    
+    if (type === 'تعليم') {
+      bot.editMessageText('اكتب تفاصيل التعليم:', {
+        chat_id: chatId,
+        message_id: messageId
+      });
+      userStates[chatId].waiting_for = 'teaching_details';
+    } else {
+      bot.editMessageText('اكتب اسم السورة:', {
+        chat_id: chatId,
+        message_id: messageId
+      });
+      userStates[chatId].waiting_for = 'surah_name';
+    }
+  }
+  
+  // تقييم الإنجاز
+  else if (data.startsWith('rate_')) {
+    const parts = data.split('_');
+    const achievementId = parseInt(parts);
+    const rating = parseInt(parts);
+    
+    userStates[OWNER_ID] = {
+      rating_achievement_id: achievementId,
+      rating_stars: rating
+    };
+    
+    bot.editMessageText(`تم اختيار التقييم: ${'⭐'.repeat(rating)}\n\nهل لديك ملاحظات؟`, {
+      chat_id: chatId,
+      message_id: messageId,
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: 'نعم، أضف ملاحظة', callback_data: `notes_yes_${achievementId}` }],
+          [{ text: 'لا، لا توجد ملاحظات', callback_data: `notes_no_${achievementId}` }]
+        ]
+      }
+    });
+  }
+  
+  // لا توجد ملاحظات
+  else if (data.startsWith('notes_no_')) {
+    const achievementId = parseInt(data.replace('notes_no_', ''));
+    const rating = userStates[OWNER_ID].rating_stars;
+    
+    // حفظ التقييم
+    saveRating(achievementId, rating, 'لا توجد ملاحظات');
+    
+    // إرسال البطاقة للطالب
+    await sendAchievementCard(achievementId);
+    
+    bot.editMessageText('✅ تم إرسال التقييم للطالب بنجاح!', {
+      chat_id: chatId,
+      message_id: messageId
+    });
+    
+    delete userStates[OWNER_ID];
+  }
+  
+  // إضافة ملاحظات
+  else if (data.startsWith('notes_yes_')) {
+    const achievementId = parseInt(data.replace('notes_yes_', ''));
+    
+    userStates[OWNER_ID] = {
+      ...userStates[OWNER_ID],
+      waiting_for: 'teacher_notes',
+      rating_achievement_id: achievementId
+    };
+    
+    bot.editMessageText('اكتب ملاحظاتك:', {
+      chat_id: chatId,
+      message_id: messageId
+    });
+  }
+});
+
+// معالجة الرسائل النصية
+bot.on('message', async (msg) => {
+  const chatId = msg.chat.id;
+  const text = msg.text;
+  
+  // تجاهل الأوامر
+  if (text && text.startsWith('/')) return;
+  
+  const userState = userStates[chatId];
+  if (!userState) return;
+  
+  const waitingFor = userState.waiting_for;
+  
+  // اسم السورة
+  if (waitingFor === 'surah_name') {
+    userStates[chatId].surah = text;
+    userStates[chatId].waiting_for = 'start_ayah';
+    bot.sendMessage(chatId, 'اكتب رقم الآية التي بدأت منها:');
+  }
+  
+  // رقم الآية البداية
+  else if (waitingFor === 'start_ayah') {
+    userStates[chatId].start_ayah = parseInt(text);
+    userStates[chatId].waiting_for = 'end_ayah';
+    bot.sendMessage(chatId, 'اكتب رقم الآية التي انتهيت عندها:');
+  }
+  
+  // رقم الآية النهاية
+  else if (waitingFor === 'end_ayah') {
+    userStates[chatId].end_ayah = parseInt(text);
+    
+    // حفظ الإنجاز
+    const achievementId = saveAchievement(chatId, msg.from.first_name, userStates[chatId]);
+    
+    bot.sendMessage(chatId, '✨ بوركت جهودك! انتظر تقييم إنجازك من المعلم.');
+    
+    // إرسال إشعار للمعلم
+    await notifyTeacher(achievementId, msg.from.first_name);
+    
+    delete userStates[chatId];
+  }
+  
+  // تفاصيل التعليم
+  else if (waitingFor === 'teaching_details') {
+    userStates[chatId].details = text;
+    
+    // حفظ الإنجاز
+    const achievementId = saveAchievement(chatId, msg.from.first_name, userStates[chatId]);
+    
+    bot.sendMessage(chatId, '✨ بوركت جهودك! انتظر تقييم إنجازك من المعلم.');
+    
+    // إرسال إشعار للمعلم
+    await notifyTeacher(achievementId, msg.from.first_name);
+    
+    delete userStates[chatId];
+  }
+  
+  // ملاحظات المعلم
+  else if (waitingFor === 'teacher_notes') {
+    const notes = text;
+    const achievementId = userState.rating_achievement_id;
+    const rating = userState.rating_stars;
+    
+    // حفظ التقييم
+    saveRating(achievementId, rating, notes);
+    
+    // إرسال البطاقة للطالب
+    await sendAchievementCard(achievementId);
+    
+    bot.sendMessage(chatId, '✅ تم إرسال التقييم للطالب بنجاح!');
+    
+    delete userStates[chatId];
+  }
+});
+
+// حفظ الإنجاز
+function saveAchievement(userId, username, data) {
+  const stmt = db.prepare(`
+    INSERT INTO achievements 
+    (user_id, username, type, surah, start_ayah, end_ayah, details, status, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+  
+  const result = stmt.run(
+    userId,
+    username,
+    data.type,
+    data.surah || '',
+    data.start_ayah || 0,
+    data.end_ayah || 0,
+    data.details || '',
+    'pending',
+    new Date().toISOString()
+  );
+  
+  return result.lastInsertRowid;
+}
+
+// إشعار المعلم
+async function notifyTeacher(achievementId, username) {
+  const achievement = db.prepare('SELECT * FROM achievements WHERE id = ?').get(achievementId);
+  
+  if (!achievement) return;
+  
+  let message = `🔔 إنجاز جديد من الطالب: ${username}\n\n`;
+  message += `📋 النوع: ${achievement.type}\n`;
+  
+  if (achievement.type !== 'تعليم') {
+    message += `📖 السورة: ${achievement.surah}\n`;
+    message += `🔢 من الآية ${achievement.start_ayah} إلى الآية ${achievement.end_ayah}\n`;
+  } else {
+    message += `📝 التفاصيل: ${achievement.details}\n`;
+  }
+  
+  message += `\n⭐ قيّم هذا الإنجاز:`;
+  
+  bot.sendMessage(OWNER_ID, message, {
+    reply_markup: {
+      inline_keyboard: [
+        [
+          { text: '⭐', callback_data: `rate_${achievementId}_1` },
+          { text: '⭐⭐', callback_data: `rate_${achievementId}_2` },
+          { text: '⭐⭐⭐', callback_data: `rate_${achievementId}_3` }
+        ],
+        [
+          { text: '⭐⭐⭐⭐', callback_data: `rate_${achievementId}_4` },
+          { text: '⭐⭐⭐⭐⭐', callback_data: `rate_${achievementId}_5` }
+        ]
+      ]
+    }
+  });
+}
+
+// حفظ التقييم
+function saveRating(achievementId, rating, notes) {
+  const stmt = db.prepare(`
+    UPDATE achievements 
+    SET status = 'rated', rating = ?, notes = ?
+    WHERE id = ?
+  `);
+  
+  stmt.run(rating, notes, achievementId);
+}
+
+// إرسال بطاقة الإنجاز للطالب
+async function sendAchievementCard(achievementId) {
+  const achievement = db.prepare('SELECT * FROM achievements WHERE id = ?').get(achievementId);
+  
+  if (!achievement) return;
+  
+  let card = `🎉 تم تقييم إنجازك!\n\n`;
+  card += `📋 النوع: ${achievement.type}\n`;
+  
+  if (achievement.type !== 'تعليم') {
+    card += `📖 السورة: ${achievement.surah}\n`;
+    card += `🔢 من الآية ${achievement.start_ayah} إلى الآية ${achievement.end_ayah}\n`;
+  } else {
+    card += `📝 التفاصيل: ${achievement.details}\n`;
+  }
+  
+  card += `\n⭐ التقييم: ${'⭐'.repeat(achievement.rating)}\n`;
+  card += `\n💬 ملاحظات المعلم:\n${achievement.notes}\n`;
+  card += `\nبارك الله في جهودك! 🌟`;
+  
+  bot.sendMessage(achievement.user_id, card);
+}
+
+console.log('✅ البوت يعمل الآن!');
