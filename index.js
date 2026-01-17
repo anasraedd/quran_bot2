@@ -26,7 +26,8 @@ db.exec(`
     status TEXT,
     rating INTEGER,
     notes TEXT,
-    created_at TEXT
+    created_at TEXT,
+    student_id INTEGER DEFAULT NULL
   )
 `);
 
@@ -270,8 +271,8 @@ bot.on('message', async (msg) => {
 function saveAchievement(userId, username, data) {
   const stmt = db.prepare(`
     INSERT INTO achievements 
-    (user_id, username, type, surah, start_ayah, end_ayah, details, status, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    (user_id, username, type, surah, start_ayah, end_ayah, details, status, created_at, student_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
   
   const result = stmt.run(
@@ -283,7 +284,8 @@ function saveAchievement(userId, username, data) {
     data.end_ayah || 0,
     data.details || '',
     'pending',
-    new Date().toISOString()
+    new Date().toISOString(),
+    null
   );
   
   return result.lastInsertRowid;
@@ -355,8 +357,8 @@ async function sendAchievementCard(achievementId) {
   card += `\n💬 ملاحظات المعلم:\n${achievement.notes}\n`;
   card += `\nبارك الله في جهودك! 🌟`;
   
-  bot.sendMessage(achievement.user_id, card);
+  // تأكد من أن user_id هو معرّف الطالب
+  bot.sendMessage(achievement.student_id || achievement.user_id, card);
 }
 
 console.log('✅ البوت يعمل الآن!');
-
