@@ -1,364 +1,306 @@
 const TelegramBot = require('node-telegram-bot-api');
 const Database = require('better-sqlite3');
 
-// ضع توكن البوت هنا
-const TOKEN = '8540862357:AAGrFvAD_rJGAXwqVNKTztKq16C-OIpRwX4';
-// ضع معرفك هنا
+/* ========= الإعدادات ========= */
+const TOKEN = 'PUT_YOUR_TOKEN_HERE';
 const OWNER_ID = 7405584377;
 
-// إنشاء البوت
+/* ========= إنشاء البوت ========= */
 const bot = new TelegramBot(TOKEN, { polling: true });
 
-// إنشاء قاعدة البيانات
+/* ========= قاعدة البيانات ========= */
 const db = new Database('bot_data.db');
 
-// إنشاء الجدول
 db.exec(`
-  CREATE TABLE IF NOT EXISTS achievements (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
-    username TEXT,
-    type TEXT,
-    surah TEXT,
-    start_ayah INTEGER,
-    end_ayah INTEGER,
-    details TEXT,
-    status TEXT,
-    rating INTEGER,
-    notes TEXT,
-    created_at TEXT,
-    student_id INTEGER DEFAULT NULL
-  )
+CREATE TABLE IF NOT EXISTS achievements (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER,
+  username TEXT,
+  type TEXT,
+  surah TEXT,
+  start_ayah INTEGER,
+  end_ayah INTEGER,
+  details TEXT,
+  status TEXT,
+  rating INTEGER,
+  notes TEXT,
+  created_at TEXT,
+  student_id INTEGER
+)
 `);
 
-// تخزين البيانات المؤقتة للمستخدمين
+/* ========= حالات المستخدم ========= */
 const userStates = {};
 
-// أمر /start
+/* ========= /start ========= */
 bot.onText(/\/start/, (msg) => {
-  const chatId = msg.chat.id;
-  
-  bot.sendMessage(chatId, 'مرحباً بك! اضغط على الزر لإضافة إنجازك اليومي:', {
-    reply_markup: {
-      inline_keyboard: [
-        [{ text: '➕ إضافة إنجاز', callback_data: 'add_achievement' }]
-      ]
+  bot.sendMessage(msg.chat.id,
+    'مرحبًا بك 🌿\nاضغط لإضافة إنجاز:',
+    {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: '➕ إضافة إنجاز', callback_data: 'add_achievement' }]
+        ]
+      }
     }
-  });
+  );
 });
 
-// معالجة الأزرار
-bot.on('callback_query', async (query) => {
-  const chatId = query.message.chat.id;
-  const messageId = query.message.message_id;
-  const data = query.data;
+/* ========= الأزرار ========= */
+bot.on('callback_query', async (q) => {
+  const chatId = q.message.chat.id;
+  const msgId = q.message.message_id;
+  const data = q.data;
 
-  // الإجابة على الضغطة
-  bot.answerCallbackQuery(query.id);
+  bot.answerCallbackQuery(q.id);
 
-  // إضافة إنجاز
+  /* ===== إضافة إنجاز ===== */
   if (data === 'add_achievement') {
-    // التحقق إذا كان المستخدم هو المالك
+
     if (chatId === OWNER_ID) {
-      bot.editMessageText('أنت المعلم! اختر الخيار:', {
-        chat_id: chatId,
-        message_id: messageId,
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: '➕ إضافة إنجاز لطالب', callback_data: 'add_for_student' }],
-            [{ text: '📊 عرض الإنجازات المعلقة', callback_data: 'pending_achievements' }]
-          ]
+      return bot.editMessageText(
+        'اختر:',
+        {
+          chat_id: chatId,
+          message_id: msgId,
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: '➕ إنجاز لطالب', callback_data: 'add_for_student' }],
+              [{ text: '📊 إنجازات معلقة', callback_data: 'pending' }]
+            ]
+          }
         }
-      });
-    } else {
-      bot.editMessageText('اختر نوع الإنجاز:', {
+      );
+    }
+
+    return bot.editMessageText(
+      'اختر نوع الإنجاز:',
+      {
         chat_id: chatId,
-        message_id: messageId,
+        message_id: msgId,
         reply_markup: {
           inline_keyboard: [
-            [{ text: '📖 حفظ جديد', callback_data: 'type_حفظ_جديد' }],
-            [{ text: '🔄 مراجعة قريبة', callback_data: 'type_مراجعة_قريبة' }],
-            [{ text: '📚 مراجعة بعيدة', callback_data: 'type_مراجعة_بعيدة' }],
+            [{ text: '📖 حفظ جديد', callback_data: 'type_حفظ' }],
+            [{ text: '🔁 مراجعة', callback_data: 'type_مراجعة' }],
             [{ text: '👨‍🏫 تعليم', callback_data: 'type_تعليم' }]
           ]
         }
-      });
-    }
+      }
+    );
   }
 
-  // إضافة إنجاز للطالب (من قبل المعلم)
-  else if (data === 'add_for_student') {
-    bot.editMessageText('اكتب اسم الطالب:', {
-      chat_id: chatId,
-      message_id: messageId
-    });
-    userStates[chatId] = { waiting_for: 'student_name', is_teacher: true };
+  /* ===== المعلم يضيف لطالب ===== */
+  if (data === 'add_for_student') {
+    userStates[chatId] = { isTeacher: true, waiting: 'student_name' };
+    return bot.editMessageText(
+      'اكتب اسم الطالب:',
+      { chat_id: chatId, message_id: msgId }
+    );
   }
 
-  // عرض الإنجازات المعلقة
-  else if (data === 'pending_achievements') {
-    const pending = db.prepare('SELECT * FROM achievements WHERE status = ?').all('pending');
+  /* ===== عرض المعلقة ===== */
+  if (data === 'pending') {
+    const list = db.prepare(`SELECT * FROM achievements WHERE status='pending'`).all();
 
-    if (pending.length === 0) {
-      bot.editMessageText('لا توجد إنجازات معلقة.', {
-        chat_id: chatId,
-        message_id: messageId
-      });
-    } else {
-      let keyboard = [];
-      pending.forEach(achievement => {
-        keyboard.push([{
-          text: `رقم الإنجاز: ${achievement.id}\nالنوع: ${achievement.type}\nاسم الطالب: ${achievement.username}`,
-          callback_data: `rate_${achievement.id}`
-        }]);
-      });
+    if (list.length === 0)
+      return bot.editMessageText('لا توجد إنجازات معلقة.', { chat_id: chatId, message_id: msgId });
 
-      bot.editMessageText('اختر الإنجاز لتقييمه:', {
-        chat_id: chatId,
-        message_id: messageId,
-        reply_markup: { inline_keyboard: keyboard }
-      });
-    }
+    const keyboard = list.map(a => [{
+      text: `🆔 ${a.id} | ${a.username}`,
+      callback_data: `rate_${a.id}`
+    }]);
+
+    return bot.editMessageText(
+      'اختر إنجازًا للتقييم:',
+      { chat_id: chatId, message_id: msgId, reply_markup: { inline_keyboard: keyboard } }
+    );
   }
 
-  // اختيار نوع الإنجاز
-  else if (data.startsWith('type_')) {
+  /* ===== اختيار نوع ===== */
+  if (data.startsWith('type_')) {
     const type = data.replace('type_', '');
-    userStates[chatId] = { type: type };
+    userStates[chatId] = { type, waiting: type === 'تعليم' ? 'details' : 'surah' };
 
-    if (type === 'تعليم') {
-      bot.editMessageText('اكتب تفاصيل التعليم:', {
-        chat_id: chatId,
-        message_id: messageId
-      });
-      userStates[chatId].waiting_for = 'teaching_details';
-    } else {
-      bot.editMessageText('اكتب اسم السورة:', {
-        chat_id: chatId,
-        message_id: messageId
-      });
-      userStates[chatId].waiting_for = 'surah_name';
-    }
+    return bot.editMessageText(
+      type === 'تعليم' ? 'اكتب تفاصيل التعليم:' : 'اكتب اسم السورة:',
+      { chat_id: chatId, message_id: msgId }
+    );
   }
 
-  // اسم الطالب (للمعلم)
-  else if (data.startsWith('student_name_')) {
-    const studentName = data.replace('student_name_', '');
-    userStates[chatId].studentName = studentName;
-    userStates[chatId].waiting_for = 'surah_name';
-    bot.editMessageText('اكتب اسم السورة:', {
-      chat_id: chatId,
-      message_id: messageId
-    });
-  }
+  /* ===== بدء التقييم ===== */
+  if (data.startsWith('rate_')) {
+    const id = Number(data.split('_')[1]);
 
-  // تقييم الإنجاز
-  else if (data.startsWith('rate_')) {
-    const parts = data.split('_');
-    const achievementId = parseInt(parts);
-
-    userStates[OWNER_ID] = {
-      rating_achievement_id: achievementId,
-      waiting_for: 'rating_stars'
+    userStates[chatId] = {
+      ratingId: id,
+      waiting: 'notes'
     };
 
-    bot.editMessageText('اختر تقييمًا (من 1 إلى 5):', {
-      chat_id: chatId,
-      message_id: messageId,
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: '⭐', callback_data: `rating_${achievementId}_1` }],
-          [{ text: '⭐⭐', callback_data: `rating_${achievementId}_2` }],
-          [{ text: '⭐⭐⭐', callback_data: `rating_${achievementId}_3` }],
-          [{ text: '⭐⭐⭐⭐', callback_data: `rating_${achievementId}_4` }],
-          [{ text: '⭐⭐⭐⭐⭐', callback_data: `rating_${achievementId}_5` }]
-        ]
+    return bot.editMessageText(
+      'اختر التقييم:',
+      {
+        chat_id: chatId,
+        message_id: msgId,
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '⭐', callback_data: `star_${id}_1` }],
+            [{ text: '⭐⭐', callback_data: `star_${id}_2` }],
+            [{ text: '⭐⭐⭐', callback_data: `star_${id}_3` }],
+            [{ text: '⭐⭐⭐⭐', callback_data: `star_${id}_4` }],
+            [{ text: '⭐⭐⭐⭐⭐', callback_data: `star_${id}_5` }]
+          ]
+        }
       }
-    });
+    );
   }
 
-  // اختيار عدد النجوم (لتقييم المعلم)
-  else if (data.startsWith('rating_')) {
-    const parts = data.split('_');
-    const achievementId = parseInt(parts);
-    const rating = parseInt(parts);
+  /* ===== النجوم ===== */
+  if (data.startsWith('star_')) {
+    const [, id, stars] = data.split('_');
+    userStates[chatId].rating = Number(stars);
+    userStates[chatId].ratingId = Number(id);
+    userStates[chatId].waiting = 'notes';
 
-    userStates[OWNER_ID].rating_stars = rating;
-    userStates[OWNER_ID].waiting_for = 'notes';
-
-    bot.editMessageText('أضف ملاحظاتك:', {
-      chat_id: chatId,
-      message_id: messageId
-    });
+    return bot.editMessageText(
+      'أرسل ملاحظاتك:',
+      { chat_id: chatId, message_id: msgId }
+    );
   }
 
-  // حفظ التقييم مع الملاحظات
-  else if (data.startsWith('notes_')) {
-    const notes = query.text; // Get notes from the message text
-    const achievementId = userStates[OWNER_ID].rating_achievement_id;
-    const rating = userStates[OWNER_ID].rating_stars;
-
-    saveRating(achievementId, rating, notes);
-
-    bot.editMessageText('✅ تم تقييم الإنجاز بنجاح!', {
-      chat_id: chatId,
-      message_id: messageId
-    });
-
-    delete userStates[OWNER_ID];
-  }
 });
 
-// معالجة الرسائل النصية
+/* ========= الرسائل ========= */
 bot.on('message', async (msg) => {
   const chatId = msg.chat.id;
   const text = msg.text;
 
-  // تجاهل الأوامر
-  if (text && text.startsWith('/')) return;
+  if (!userStates[chatId] || text.startsWith('/')) return;
 
-  const userState = userStates[chatId];
-  if (!userState) return;
+  const s = userStates[chatId];
 
-  const waitingFor = userState.waiting_for;
-
-  // اسم السورة
-  if (waitingFor === 'surah_name') {
-    userStates[chatId].surah = text;
-    userStates[chatId].waiting_for = 'start_ayah';
-    bot.sendMessage(chatId, 'اكتب رقم الآية التي بدأت منها:');
+  /* === اسم الطالب === */
+  if (s.waiting === 'student_name') {
+    s.student_name = text;
+    s.waiting = 'student_id';
+    return bot.sendMessage(chatId, 'أرسل معرف الطالب (ID رقمي):');
   }
 
-  // رقم الآية البداية
-  else if (waitingFor === 'start_ayah') {
-    userStates[chatId].start_ayah = parseInt(text);
-    userStates[chatId].waiting_for = 'end_ayah';
-    bot.sendMessage(chatId, 'اكتب رقم الآية التي انتهيت عندها:');
+  /* === ID الطالب === */
+  if (s.waiting === 'student_id') {
+    s.student_id = Number(text);
+    s.waiting = 'surah';
+    return bot.sendMessage(chatId, 'اكتب اسم السورة:');
   }
 
-  // رقم الآية النهاية
-  else if (waitingFor === 'end_ayah') {
-    userStates[chatId].end_ayah = parseInt(text);
+  /* === السورة === */
+  if (s.waiting === 'surah') {
+    s.surah = text;
+    s.waiting = 'start';
+    return bot.sendMessage(chatId, 'من آية رقم:');
+  }
 
-    // حفظ الإنجاز
-    const achievementId = saveAchievement(chatId, msg.from.first_name, userStates[chatId]);
+  if (s.waiting === 'start') {
+    s.start = Number(text);
+    s.waiting = 'end';
+    return bot.sendMessage(chatId, 'إلى آية رقم:');
+  }
 
-    bot.sendMessage(chatId, '✨ بوركت جهودك! انتظر تقييم إنجازك من المعلم.');
+  if (s.waiting === 'end') {
+    s.end = Number(text);
 
-    // إرسال إشعار للمعلم
-    await notifyTeacher(achievementId, msg.from.first_name);
+    const id = saveAchievement(chatId, msg.from.first_name, s);
+
+    bot.sendMessage(chatId, '✅ تم تسجيل الإنجاز.');
+    notifyTeacher(id);
 
     delete userStates[chatId];
   }
 
-  // تفاصيل التعليم
-  else if (waitingFor === 'teaching_details') {
-    userStates[chatId].details = text;
+  /* === تعليم === */
+  if (s.waiting === 'details') {
+    s.details = text;
 
-    // حفظ الإنجاز
-    const achievementId = saveAchievement(chatId, msg.from.first_name, userStates[chatId]);
+    const id = saveAchievement(chatId, msg.from.first_name, s);
+    bot.sendMessage(chatId, '✅ تم تسجيل الإنجاز.');
 
-    bot.sendMessage(chatId, '✨ بوركت جهودك! انتظر تقييم إنجازك من المعلم.');
+    notifyTeacher(id);
+    delete userStates[chatId];
+  }
 
-    // إرسال إشعار للمعلم
-    await notifyTeacher(achievementId, msg.from.first_name);
-
+  /* === ملاحظات التقييم === */
+  if (s.waiting === 'notes') {
+    saveRating(s.ratingId, s.rating, text);
+    bot.sendMessage(chatId, '⭐ تم التقييم بنجاح.');
     delete userStates[chatId];
   }
 });
 
-// حفظ الإنجاز
-function saveAchievement(userId, username, data) {
-  const stmt = db.prepare(`
-    INSERT INTO achievements 
+/* ========= حفظ الإنجاز ========= */
+function saveAchievement(userId, username, d) {
+  const r = db.prepare(`
+    INSERT INTO achievements
     (user_id, username, type, surah, start_ayah, end_ayah, details, status, created_at, student_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `);
-
-  const result = stmt.run(
+    VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)
+  `).run(
     userId,
-    username,
-    data.type,
-    data.surah || '',
-    data.start_ayah || 0,
-    data.end_ayah || 0,
-    data.details || '',
-    'pending',
+    d.student_name || username,
+    d.type || 'حفظ',
+    d.surah || '',
+    d.start || 0,
+    d.end || 0,
+    d.details || '',
     new Date().toISOString(),
-    null
+    d.student_id || userId
   );
 
-  return result.lastInsertRowid;
+  return r.lastInsertRowid;
 }
 
-// إشعار المعلم
-async function notifyTeacher(achievementId, username) {
-  const achievement = db.prepare('SELECT * FROM achievements WHERE id = ?').get(achievementId);
-
-  if (!achievement) return;
-
-  let message = `🔔 إنجاز جديد من الطالب: ${username}\n\n`;
-  message += `📋 النوع: ${achievement.type}\n`;
-
-  if (achievement.type !== 'تعليم') {
-    message += `📖 السورة: ${achievement.surah}\n`;
-    message += `🔢 من الآية ${achievement.start_ayah} إلى الآية ${achievement.end_ayah}\n`;
-  } else {
-    message += `📝 التفاصيل: ${achievement.details}\n`;
-  }
-
-  message += `\n⭐ قيّم هذا الإنجاز:`;
-
-  bot.sendMessage(OWNER_ID, message, {
-    reply_markup: {
-      inline_keyboard: [
-        [
-          { text: '⭐', callback_data: `rate_${achievementId}_1` },
-          { text: '⭐⭐', callback_data: `rate_${achievementId}_2` },
-          { text: '⭐⭐⭐', callback_data: `rate_${achievementId}_3` }
-        ],
-        [
-          { text: '⭐⭐⭐⭐', callback_data: `rate_${achievementId}_4` },
-          { text: '⭐⭐⭐⭐⭐', callback_data: `rate_${achievementId}_5` }
+/* ========= إشعار المعلم ========= */
+function notifyTeacher(id) {
+  bot.sendMessage(
+    OWNER_ID,
+    `📥 إنجاز جديد (#${id})`,
+    {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: '⭐ تقييم الإنجاز', callback_data: `rate_${id}` }]
         ]
-      ]
+      }
     }
-  });
+  );
 }
 
-// حفظ التقييم
-function saveRating(achievementId, rating, notes) {
-  const stmt = db.prepare(`
-    UPDATE achievements 
-    SET status = 'rated', rating = ?, notes = ?
-    WHERE id = ?
-  `);
+/* ========= حفظ التقييم + إرسال البطاقة ========= */
+function saveRating(id, rating, notes) {
+  db.prepare(`
+    UPDATE achievements
+    SET status='rated', rating=?, notes=?
+    WHERE id=?
+  `).run(rating, notes, id);
 
-  stmt.run(rating, notes, achievementId);
+  sendAchievementCard(id);
 }
 
-// إرسال بطاقة الإنجاز للطالب
-async function sendAchievementCard(achievementId) {
-  const achievement = db.prepare('SELECT * FROM achievements WHERE id = ?').get(achievementId);
+/* ========= بطاقة الطالب ========= */
+function sendAchievementCard(id) {
+  const a = db.prepare(`SELECT * FROM achievements WHERE id=?`).get(id);
+  if (!a) return;
 
-  if (!achievement) return;
+  const msg =
+`🎉 تم تقييم إنجازك
 
-  let card = `🎉 تم تقييم إنجازك!\n\n`;
-  card += `📋 النوع: ${achievement.type}\n`;
+📖 السورة: ${a.surah}
+🔢 من ${a.start_ayah} إلى ${a.end_ayah}
 
-  if (achievement.type !== 'تعليم') {
-    card += `📖 السورة: ${achievement.surah}\n`;
-    card += `🔢 من الآية ${achievement.start_ayah} إلى الآية ${achievement.end_ayah}\n`;
-  } else {
-    card += `📝 التفاصيل: ${achievement.details}\n`;
-  }
+⭐ التقييم: ${'⭐'.repeat(a.rating)}
 
-  card += `\n⭐ التقييم: ${'⭐'.repeat(achievement.rating)}\n`;
-  card += `\n💬 ملاحظات المعلم:\n${achievement.notes}\n`;
-  card += `\nبارك الله في جهودك! 🌟`;
+💬 ملاحظات المعلم:
+${a.notes}
 
-  // تأكد من أن user_id هو معرّف الطالب
-  bot.sendMessage(achievement.student_id || achievement.user_id, card);
+بارك الله فيك 🌿`;
+
+  bot.sendMessage(a.student_id, msg);
 }
 
-console.log('✅ البوت يعمل الآن!');
+console.log('✅ البوت يعمل بنجاح');
