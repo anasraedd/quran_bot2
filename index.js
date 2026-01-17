@@ -2,9 +2,9 @@ const TelegramBot = require('node-telegram-bot-api');
 const Database = require('better-sqlite3');
 
 // ضع توكن البوت هنا
-const TOKEN = '8540862357:AAGrFvAD_rJGAXwqVNKTztKq16C-OIpRwX4';
+const TOKEN = '7713309109:AAGHzUo4II7qhzTKCsrO33cQ-2x0GTupQq0';
 // ضع معرفك هنا
-const OWNER_ID = 7405584377;
+const OWNER_ID = 7459198377;
 
 // إنشاء البوت
 const bot = new TelegramBot(TOKEN, { polling: true });
