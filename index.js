@@ -173,7 +173,7 @@ bot.on('callback_query', async (query) => {
           [{ text: '⭐⭐⭐⭐⭐', callback_data: `rating_${achievementId}_5` }]
         ]
       }
-    };
+    });
   }
 
   // اختيار عدد النجوم (لتقييم المعلم)
@@ -359,3 +359,4 @@ async function sendAchievementCard(achievementId) {
 }
 
 console.log('✅ البوت يعمل الآن!');
+
