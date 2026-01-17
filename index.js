@@ -80,9 +80,19 @@ bot.on('callback_query', async (q) => {
         message_id: msgId,
         reply_markup: {
           inline_keyboard: [
-            [{ text: '📖 حفظ جديد', callback_data: 'type_حفظ' }],
-            [{ text: '🔁 مراجعة', callback_data: 'type_مراجعة' }],
-            [{ text: '👨‍🏫 تعليم', callback_data: 'type_تعليم' }]
+          [
+  { text: '📖 حفظ جديد', callback_data: 'type_حفظ جديد' }
+],
+[
+  { text: '🔄 مراجعة قريبة', callback_data: 'type_مراجعة قريبة' }
+],
+[
+  { text: '📚 مراجعة بعيدة', callback_data: 'type_مراجعة بعيدة' }
+],
+[
+  { text: '👨‍🏫 تعليم', callback_data: 'type_تعليم' }
+]
+
           ]
         }
       }
@@ -257,19 +267,47 @@ function saveAchievement(userId, username, d) {
 }
 
 /* ========= إشعار المعلم ========= */
-function notifyTeacher(id) {
-  bot.sendMessage(
-    OWNER_ID,
-    `📥 إنجاز جديد (#${id})`,
-    {
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: '⭐ تقييم الإنجاز', callback_data: `rate_${id}` }]
-        ]
-      }
+function notifyTeacher(achievementId) {
+  const a = db.prepare(
+    'SELECT * FROM achievements WHERE id = ?'
+  ).get(achievementId);
+
+  if (!a) return;
+
+  let message =
+`🔔 إنجاز جديد
+
+👤 الطالب: ${a.username}
+📋 النوع: ${a.type}
+`;
+
+  if (a.type !== 'تعليم') {
+    message +=
+`📖 السورة: ${a.surah}
+🔢 من الآية ${a.start_ayah} إلى الآية ${a.end_ayah}
+`;
+  } else {
+    message +=
+`📝 تفاصيل التعليم:
+${a.details}
+`;
+  }
+
+  message += `
+🕒 التاريخ: ${new Date(a.created_at).toLocaleString('ar-EG')}
+
+⭐ اضغط للتقييم 👇
+`;
+
+  bot.sendMessage(OWNER_ID, message, {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: '⭐ تقييم الإنجاز', callback_data: `rate_${achievementId}` }]
+      ]
     }
-  );
+  });
 }
+
 
 /* ========= حفظ التقييم + إرسال البطاقة ========= */
 function saveRating(id, rating, notes) {
@@ -304,4 +342,5 @@ ${a.notes}
 }
 
 console.log('✅ البوت يعمل بنجاح');
+
 
