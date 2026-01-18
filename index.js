@@ -33,18 +33,24 @@ CREATE TABLE IF NOT EXISTS achievements (
 const userStates = {};
 
 /* ========= /start ========= */
-bot.onText(/\/start/, (msg) => {
-  bot.sendMessage(msg.chat.id,
-    'مرحبًا بك 🌿\nاضغط لإضافة إنجاز:',
-    {
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: '➕ إضافة إنجاز', callback_data: 'add_achievement' }]
-        ]
-      }
+function mainMenu() {
+  return {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: '➕ إضافة إنجاز', callback_data: 'start_add' }]
+      ]
     }
+  };
+}
+
+bot.onText(/\/start/, (msg) => {
+  bot.sendMessage(
+    msg.chat.id,
+    'مرحبًا بك 🌿',
+    mainMenu()
   );
 });
+
 
 /* ========= الأزرار ========= */
 bot.on('callback_query', async (q) => {
@@ -54,8 +60,49 @@ bot.on('callback_query', async (q) => {
 
   bot.answerCallbackQuery(q.id);
 
-  /* ===== إضافة إنجاز ===== */
-  if (data === 'add_achievement') {
+  /* ===============================
+     زر إضافة / إلغاء إنجاز
+  =============================== */
+
+  if (data === 'start_add') {
+    userStates[chatId] = { active: true };
+
+    return bot.editMessageText(
+      '📝 بدأ تسجيل الإنجاز',
+      {
+        chat_id: chatId,
+        message_id: msgId,
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '❌ إلغاء تسجيل الإنجاز', callback_data: 'cancel_add' }]
+          ]
+        }
+      }
+    );
+  }
+
+  if (data === 'cancel_add') {
+    delete userStates[chatId];
+
+    return bot.editMessageText(
+      '❎ تم إلغاء تسجيل الإنجاز',
+      {
+        chat_id: chatId,
+        message_id: msgId,
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '➕ إضافة إنجاز', callback_data: 'start_add' }]
+          ]
+        }
+      }
+    );
+  }
+
+  /* ===============================
+     اختيار نوع الإنجاز
+  =============================== */
+
+  if (data === 'add_achievement' || data === 'start_add') {
 
     if (chatId === OWNER_ID) {
       return bot.editMessageText(
@@ -80,40 +127,43 @@ bot.on('callback_query', async (q) => {
         message_id: msgId,
         reply_markup: {
           inline_keyboard: [
-          [
-  { text: '📖 حفظ جديد', callback_data: 'type_حفظ جديد' }
-],
-[
-  { text: '🔄 مراجعة قريبة', callback_data: 'type_مراجعة قريبة' }
-],
-[
-  { text: '📚 مراجعة بعيدة', callback_data: 'type_مراجعة بعيدة' }
-],
-[
-  { text: '👨‍🏫 تعليم', callback_data: 'type_تعليم' }
-]
-
+            [{ text: '📖 حفظ جديد', callback_data: 'type_حفظ جديد' }],
+            [{ text: '🔄 مراجعة قريبة', callback_data: 'type_مراجعة قريبة' }],
+            [{ text: '📚 مراجعة بعيدة', callback_data: 'type_مراجعة بعيدة' }],
+            [{ text: '👨‍🏫 تعليم', callback_data: 'type_تعليم' }]
           ]
         }
       }
     );
   }
 
-  /* ===== المعلم يضيف لطالب ===== */
+  /* ===============================
+     المعلم يضيف لطالب
+  =============================== */
+
   if (data === 'add_for_student') {
     userStates[chatId] = { isTeacher: true, waiting: 'student_name' };
+
     return bot.editMessageText(
       'اكتب اسم الطالب:',
       { chat_id: chatId, message_id: msgId }
     );
   }
 
-  /* ===== عرض المعلقة ===== */
+  /* ===============================
+     عرض الإنجازات المعلقة
+  =============================== */
+
   if (data === 'pending') {
-    const list = db.prepare(`SELECT * FROM achievements WHERE status='pending'`).all();
+    const list = db
+      .prepare(`SELECT * FROM achievements WHERE status='pending'`)
+      .all();
 
     if (list.length === 0)
-      return bot.editMessageText('لا توجد إنجازات معلقة.', { chat_id: chatId, message_id: msgId });
+      return bot.editMessageText(
+        'لا توجد إنجازات معلقة.',
+        { chat_id: chatId, message_id: msgId }
+      );
 
     const keyboard = list.map(a => [{
       text: `🆔 ${a.id} | ${a.username}`,
@@ -122,22 +172,39 @@ bot.on('callback_query', async (q) => {
 
     return bot.editMessageText(
       'اختر إنجازًا للتقييم:',
-      { chat_id: chatId, message_id: msgId, reply_markup: { inline_keyboard: keyboard } }
+      {
+        chat_id: chatId,
+        message_id: msgId,
+        reply_markup: { inline_keyboard: keyboard }
+      }
     );
   }
 
-  /* ===== اختيار نوع ===== */
+  /* ===============================
+     اختيار نوع
+  =============================== */
+
   if (data.startsWith('type_')) {
     const type = data.replace('type_', '');
-    userStates[chatId] = { type, waiting: type === 'تعليم' ? 'details' : 'surah' };
+
+    userStates[chatId] = {
+      ...userStates[chatId],
+      type,
+      waiting: type === 'تعليم' ? 'details' : 'surah'
+    };
 
     return bot.editMessageText(
-      type === 'تعليم' ? 'اكتب تفاصيل التعليم:' : 'اكتب اسم السورة:',
+      type === 'تعليم'
+        ? 'اكتب تفاصيل التعليم:'
+        : 'اختر السورة:',
       { chat_id: chatId, message_id: msgId }
     );
   }
 
-  /* ===== بدء التقييم ===== */
+  /* ===============================
+     بدء التقييم
+  =============================== */
+
   if (data.startsWith('rate_')) {
     const id = Number(data.split('_')[1]);
 
@@ -164,9 +231,13 @@ bot.on('callback_query', async (q) => {
     );
   }
 
-  /* ===== النجوم ===== */
+  /* ===============================
+     النجوم
+  =============================== */
+
   if (data.startsWith('star_')) {
     const [, id, stars] = data.split('_');
+
     userStates[chatId].rating = Number(stars);
     userStates[chatId].ratingId = Number(id);
     userStates[chatId].waiting = 'notes';
@@ -178,6 +249,7 @@ bot.on('callback_query', async (q) => {
   }
 
 });
+
 
 /* ========= الرسائل ========= */
 bot.on('message', async (msg) => {
@@ -342,5 +414,6 @@ ${a.notes}
 }
 
 console.log('✅ البوت يعمل بنجاح');
+
 
 
