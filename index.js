@@ -2,7 +2,7 @@ const TelegramBot = require('node-telegram-bot-api');
 const Database = require('better-sqlite3');
 
 /* ========= الإعدادات ========= */
-const TOKEN = 'PUT_YOUR_TOKEN_HERE';
+const TOKEN = '8540862357:AAGrFvAD_rJGAXwqVNKTztKq16C-OIpRwX4';
 const OWNER_ID = 7405584377;
 
 /* ========= إنشاء البوت ========= */
@@ -233,3 +233,4 @@ function saveAchievement(userId, username, d) {
 }
 
 console.log('✅ البوت يعمل بنجاح');
+
