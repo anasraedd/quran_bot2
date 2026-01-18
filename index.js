@@ -33,10 +33,14 @@ const userStates = {};
 
 const studentMenu = {
   reply_markup: {
-    keyboard: [[{ text: '➕ إضافة إنجاز' }]],
+    keyboard: [
+      [{ text: '➕ إضافة إنجاز' }],
+      [{ text: '📘 آخر إنجاز' }]
+    ],
     resize_keyboard: true
   }
 };
+
 
 const teacherMenu = {
   reply_markup: {
@@ -96,6 +100,37 @@ bot.on('message', async msg => {
       chatId === OWNER_ID ? teacherMenu : studentMenu
     );
   }
+if (text === '📘 آخر إنجاز') {
+  const last = db.prepare(`
+    SELECT * FROM achievements
+    WHERE student_id = ?
+    ORDER BY id DESC
+    LIMIT 1
+  `).get(chatId);
+
+  if (!last)
+    return bot.sendMessage(chatId, 'لا يوجد إنجازات مسجلة بعد 🌿');
+
+  let msg =
+`📘 آخر إنجاز لك
+
+📋 النوع: ${last.type}
+📖 السورة: ${last.surah}
+🔢 من ${last.start_ayah} إلى ${last.end_ayah}
+`;
+
+  if (last.status === 'rated') {
+    msg += `
+⭐ التقييم: ${'⭐'.repeat(last.rating)}
+
+💬 ملاحظات المعلم:
+${last.notes}`;
+  } else {
+    msg += `\n⏳ لم يتم تقييم الإنجاز بعد`;
+  }
+
+  return bot.sendMessage(chatId, msg);
+}
 
   /* ===== غير مسجل ===== */
 
@@ -241,6 +276,11 @@ function finishAchievement(chatId, username) {
   );
 
   sendToTeacher(r.lastInsertRowid);
+bot.sendMessage(
+  chatId,
+  '✅ تم تسجيل الإنجاز بنجاح',
+  chatId === OWNER_ID ? teacherMenu : studentMenu
+);
 
   delete userStates[chatId];
 }
@@ -304,3 +344,4 @@ ${a.notes}
 }
 
 console.log('✅ البوت يعمل بشكل سليم');
+
