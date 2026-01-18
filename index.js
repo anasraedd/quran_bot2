@@ -32,26 +32,43 @@ CREATE TABLE IF NOT EXISTS achievements (
 /* ========= حالات المستخدم ========= */
 const userStates = {};
 
-/* ========= /start ========= */
-function mainMenu() {
-  return {
-    reply_markup: {
-      inline_keyboard: [
-       [{ text: '➕ إضافة إنجاز', callback_data: 'start_add' }]
 
-      ]
-    }
-  };
-}
+const addKeyboard = {
+  reply_markup: {
+    keyboard: [
+      [{ text: '➕ إضافة إنجاز' }]
+    ],
+    resize_keyboard: true
+  }
+};
+
+const cancelKeyboard = {
+  reply_markup: {
+    keyboard: [
+      [{ text: '❌ إلغاء تسجيل الإنجاز' }]
+    ],
+    resize_keyboard: true
+  }
+};
+
 
 bot.onText(/\/start/, (msg) => {
   bot.sendMessage(
     msg.chat.id,
     'مرحبًا بك 🌿',
-    mainMenu()
+    mainMenu(),
+    addKeyboard
   );
 });
-
+/*
+bot.onText(/\/start/, (msg) => {
+  bot.sendMessage(
+    msg.chat.id,
+    'مرحبًا بك 🌿',
+    addKeyboard
+  );
+});
+*/
 
 /* ========= الأزرار ========= */
 bot.on('callback_query', async (q) => {
@@ -64,23 +81,44 @@ bot.on('callback_query', async (q) => {
   /* ===============================
      زر إضافة / إلغاء إنجاز
   =============================== */
+if (data === 'start_add') {
 
-  if (data === 'start_add') {
-    userStates[chatId] = { active: true };
+  userStates[chatId] = {
+    active: true,
+    isTeacher: chatId === OWNER_ID
+  };
+
+  // 👨‍🏫 المعلم
+  if (chatId === OWNER_ID) {
+    userStates[chatId].waiting = 'student_name';
 
     return bot.editMessageText(
-      '📝 بدأ تسجيل الإنجاز',
-      {
-        chat_id: chatId,
-        message_id: msgId,
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: '❌ إلغاء تسجيل الإنجاز', callback_data: 'cancel_add' }]
-          ]
-        }
-      }
+      'اكتب اسم الطالب:',
+      { chat_id: chatId, message_id: msgId }
     );
   }
+
+  // 👤 الطالب
+  return bot.editMessageText(
+    'اختر نوع الإنجاز:',
+    {
+      chat_id: chatId,
+      message_id: msgId,
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: '📖 حفظ جديد', callback_data: 'type_حفظ جديد' }],
+          [{ text: '🔄 مراجعة قريبة', callback_data: 'type_مراجعة قريبة' }],
+          [{ text: '📚 مراجعة بعيدة', callback_data: 'type_مراجعة بعيدة' }],
+          [{ text: '👨‍🏫 تعليم', callback_data: 'type_تعليم' }],
+          [{ text: '❌ إلغاء تسجيل الإنجاز', callback_data: 'cancel_add' }]
+        ]
+      }
+    }
+  );
+}
+
+
+
 
   if (data === 'cancel_add') {
     delete userStates[chatId];
@@ -103,40 +141,6 @@ bot.on('callback_query', async (q) => {
      اختيار نوع الإنجاز
   =============================== */
 
-  if (data === 'add_achievement' || data === 'start_add') {
-
-    if (chatId === OWNER_ID) {
-      return bot.editMessageText(
-        'اختر:',
-        {
-          chat_id: chatId,
-          message_id: msgId,
-          reply_markup: {
-            inline_keyboard: [
-              [{ text: '➕ إنجاز لطالب', callback_data: 'add_for_student' }],
-              [{ text: '📊 إنجازات معلقة', callback_data: 'pending' }]
-            ]
-          }
-        }
-      );
-    }
-
-    return bot.editMessageText(
-      'اختر نوع الإنجاز:',
-      {
-        chat_id: chatId,
-        message_id: msgId,
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: '📖 حفظ جديد', callback_data: 'type_حفظ جديد' }],
-            [{ text: '🔄 مراجعة قريبة', callback_data: 'type_مراجعة قريبة' }],
-            [{ text: '📚 مراجعة بعيدة', callback_data: 'type_مراجعة بعيدة' }],
-            [{ text: '👨‍🏫 تعليم', callback_data: 'type_تعليم' }]
-          ]
-        }
-      }
-    );
-  }
 
   /* ===============================
      المعلم يضيف لطالب
@@ -186,21 +190,35 @@ bot.on('callback_query', async (q) => {
   =============================== */
 
   if (data.startsWith('type_')) {
-    const type = data.replace('type_', '');
+  const type = data.replace('type_', '');
 
-    userStates[chatId] = {
-      ...userStates[chatId],
-      type,
-      waiting: type === 'تعليم' ? 'details' : 'surah'
-    };
+  userStates[chatId] = {
+    ...userStates[chatId],
+    type
+  };
+
+  // 👨‍🏫 إذا المعلم
+  if (chatId === OWNER_ID) {
+    userStates[chatId].waiting = 'student_name';
 
     return bot.editMessageText(
-      type === 'تعليم'
-        ? 'اكتب تفاصيل التعليم:'
-        : 'اختر السورة:',
+      'اكتب اسم الطالب:',
       { chat_id: chatId, message_id: msgId }
     );
   }
+
+  // 👤 طالب
+  userStates[chatId].waiting =
+    type === 'تعليم' ? 'details' : 'surah';
+
+  return bot.editMessageText(
+    type === 'تعليم'
+      ? 'اكتب تفاصيل التعليم:'
+      : 'اكتب اسم السورة:',
+    { chat_id: chatId, message_id: msgId }
+  );
+}
+
 
   /* ===============================
      بدء التقييم
@@ -256,7 +274,24 @@ bot.on('callback_query', async (q) => {
 bot.on('message', async (msg) => {
   const chatId = msg.chat.id;
   const text = msg.text;
+  if (text === '➕ إضافة إنجاز') {
+    userStates[chatId] = {};
+    return bot.sendMessage(
+      chatId,
+      '✅ تم بدء تسجيل الإنجاز\nاختر النوع:',
+      cancelKeyboard
+    );
+  }
 
+  if (text === '❌ إلغاء تسجيل الإنجاز') {
+    delete userStates[chatId];
+    return bot.sendMessage(
+      chatId,
+      '❎ تم إلغاء تسجيل الإنجاز',
+      addKeyboard
+    );
+  }
+  
   if (!userStates[chatId] || text.startsWith('/')) return;
 
   const s = userStates[chatId];
@@ -415,6 +450,7 @@ ${a.notes}
 }
 
 console.log('✅ البوت يعمل بنجاح');
+
 
 
 
