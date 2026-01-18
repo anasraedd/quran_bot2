@@ -56,7 +56,7 @@ bot.onText(/\/start/, (msg) => {
   bot.sendMessage(
     msg.chat.id,
     'مرحبًا بك 🌿',
-    mainMenu(),
+  //  mainMenu(),
     addKeyboard
   );
 });
@@ -450,6 +450,7 @@ ${a.notes}
 }
 
 console.log('✅ البوت يعمل بنجاح');
+
 
 
 
