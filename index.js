@@ -308,8 +308,33 @@ ${last.notes}`;
     return showTypes(chatId);
   }
 
+  
   /* ===== السورة ===== */
 
+  if (s.waiting === 'surah') {
+
+  const input = normalizeSurahName(text);
+  const realSurah = normalizedSurahs[input];
+
+  if (!realSurah) {
+    return bot.sendMessage(
+      chatId,
+      '❌ اسم السورة غير موجود.\nمثال: البقرة – الفاتحة – النساء'
+    );
+  }
+
+  s.surah = realSurah;
+  s.waiting = 'start';
+
+  const maxAyah = quranSurahs[realSurah];
+
+  return bot.sendMessage(
+    chatId,
+    `✅ تم اختيار سورة ${realSurah}\nعدد آياتها ${maxAyah}\n\nاكتب من آية رقم:`
+  );
+}
+
+  
 if (s.waiting === 'start') {
   const num = parseInt(text.trim(), 10);
   const maxAyah = getMaxAyah(s.surah);
@@ -563,6 +588,7 @@ ${a.notes}
 }
 
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
