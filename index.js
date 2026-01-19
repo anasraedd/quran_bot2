@@ -160,6 +160,9 @@ const quranSurahs = {
   'الناس': 6
 };
 
+function getMaxAyah(surah) {
+  return quranSurahs[surah] || null;
+}
 
 
 
@@ -309,15 +312,20 @@ ${last.notes}`;
 
 if (s.waiting === 'start') {
   const num = parseInt(text.trim(), 10);
+  const maxAyah = getMaxAyah(s.surah);
 
-  if (isNaN(num)) {
-    return bot.sendMessage(chatId, '❌ أدخل رقم آية صحيح فقط');
+  if (!maxAyah) {
+    return bot.sendMessage(chatId, '❌ خطأ في السورة، أعد اختيارها');
   }
 
-  if (num < 1 || num >= s.maxAyah) {
+  if (isNaN(num)) {
+    return bot.sendMessage(chatId, '❌ أدخل رقمًا صحيحًا');
+  }
+
+  if (num < 1 || num >= maxAyah) {
     return bot.sendMessage(
       chatId,
-      `❌ رقم الآية يجب أن يكون بين 1 و ${s.maxAyah - 1}`
+      `❌ رقم الآية يجب أن يكون بين 1 و ${maxAyah - 1}`
     );
   }
 
@@ -330,15 +338,20 @@ if (s.waiting === 'start') {
 
 if (s.waiting === 'end') {
   const num = parseInt(text.trim(), 10);
+  const maxAyah = getMaxAyah(s.surah);
 
-  if (isNaN(num)) {
-    return bot.sendMessage(chatId, '❌ أدخل رقم آية صحيح فقط');
+  if (!maxAyah) {
+    return bot.sendMessage(chatId, '❌ خطأ في السورة، أعد اختيارها');
   }
 
-  if (num <= s.start || num > s.maxAyah) {
+  if (isNaN(num)) {
+    return bot.sendMessage(chatId, '❌ أدخل رقمًا صحيحًا');
+  }
+
+  if (num <= s.start || num > maxAyah) {
     return bot.sendMessage(
       chatId,
-      `❌ رقم الآية يجب أن يكون بين ${s.start + 1} و ${s.maxAyah}`
+      `❌ رقم الآية يجب أن يكون بين ${s.start + 1} و ${maxAyah}`
     );
   }
 
@@ -346,6 +359,7 @@ if (s.waiting === 'end') {
 
   return finishAchievement(chatId, msg.from.first_name);
 }
+
 
 
   /* ===== تعليم ===== */
@@ -549,6 +563,7 @@ ${a.notes}
 }
 
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
