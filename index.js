@@ -253,6 +253,27 @@ bot.on('callback_query', q => {
 );
 
   }
+  /* ===============================
+   اختيار السورة من الأزرار
+=============================== */
+if (data.startsWith('surah_')) {
+  const surahName = data.replace('surah_', '');
+  const s = userStates[chatId];
+
+  if (!s) return;
+
+  s.surah = surahName;
+  s.waiting = 'start';
+
+  return bot.editMessageText(
+    `✅ تم اختيار سورة ${surahName}\n\nاكتب من آية رقم:`,
+    {
+      chat_id: chatId,
+      message_id: q.message.message_id
+    }
+  );
+}
+
 
   /* ===== تقييم ===== */
 
@@ -386,5 +407,6 @@ ${a.notes}
 }
 
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
