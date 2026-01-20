@@ -311,28 +311,23 @@ ${last.notes}`;
   
   /* ===== السورة ===== */
 
-  if (s.waiting === 'surah') {
+if (s.waiting === 'surah') {
 
-  const input = normalizeSurahName(text);
-  const realSurah = normalizedSurahs[input];
+  const surah = normalizeSurah(text);
 
-  if (!realSurah) {
-    return bot.sendMessage(
-      chatId,
-      '❌ اسم السورة غير موجود.\nمثال: البقرة – الفاتحة – النساء'
-    );
+  if (!surah) {
+    return bot.sendMessage(chatId, '❌ اسم السورة غير صحيح');
   }
 
-  s.surah = realSurah;
+  s.surah = surah;
   s.waiting = 'start';
-
-  const maxAyah = quranSurahs[realSurah];
 
   return bot.sendMessage(
     chatId,
-    `✅ تم اختيار سورة ${realSurah}\nعدد آياتها ${maxAyah}\n\nاكتب من آية رقم:`
+    `✅ تم اختيار سورة ${surah}\nاكتب من آية رقم:`
   );
 }
+
 
   
 if (s.waiting === 'start') {
@@ -588,6 +583,7 @@ ${a.notes}
 }
 
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
