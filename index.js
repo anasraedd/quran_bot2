@@ -311,22 +311,11 @@ ${last.notes}`;
   
   /* ===== السورة ===== */
 
-if (s.waiting === 'surah') {
-
-  const surah = normalizeSurah(text);
-
-  if (!surah) {
-    return bot.sendMessage(chatId, '❌ اسم السورة غير صحيح');
+  if (s.waiting === 'surah') {
+    s.surah = text;
+    s.waiting = 'start';
+    return bot.sendMessage(chatId, 'من آية رقم:');
   }
-
-  s.surah = surah;
-  s.waiting = 'start';
-
-  return bot.sendMessage(
-    chatId,
-    `✅ تم اختيار سورة ${surah}\nاكتب من آية رقم:`
-  );
-}
 
 
   
@@ -583,6 +572,7 @@ ${a.notes}
 }
 
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
