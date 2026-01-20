@@ -354,33 +354,7 @@ ${last.notes}`;
   const s = userStates[chatId];
 
   /* ===== المعلم ===== */
-if (s.waiting === 'student_name') {
-  s.student_name = text;
 
-  // تحقق هل الطالب موجود مسبقًا؟
-  const existing = db.prepare(`SELECT * FROM students WHERE student_name=?`).get(text);
-
-  if (existing) {
-    // موجود مسبقًا، استخدم المعرف الموجود
-    s.student_id = existing.student_id;
-    s.waiting = 'choose_type';
-    return showTypes(chatId);
-  } else {
-    // جديد، اطلب المعرف
-    s.waiting = 'student_id';
-    return bot.sendMessage(chatId, 'اكتب معرف الطالب الرقمي:');
-  }
-}
-
-if (s.waiting === 'student_id') {
-  s.student_id = Number(text);
-
-  // أضف الطالب الجديد للقائمة
-  db.prepare(`INSERT INTO students (student_id, student_name) VALUES (?, ?)`).run(s.student_id, s.student_name);
-
-  s.waiting = 'choose_type';
-  return showTypes(chatId);
-}
 
   /*
 
@@ -389,13 +363,31 @@ if (s.waiting === 'student_id') {
     s.waiting = 'student_id';
     return bot.sendMessage(chatId, 'اكتب معرف الطالب الرقمي:');
   }
+*/
+   if (s.isTeacher) {
+    const students = db.prepare('SELECT * FROM students').all();
 
+    if (students.length === 0) {
+      return bot.sendMessage(chatId, 'لا يوجد طلاب مسجلين بعد.');
+    }
+
+     /*
+    const keyboard = students.map(st => [
+      { text: st.student_name, callback_data: `student_${st.student_id}` }
+    ]);
+
+    return bot.sendMessage(chatId, 'اختر الطالب:', {
+      reply_markup: { inline_keyboard: keyboard }
+    });
+     */
+  }
   if (s.waiting === 'student_id') {
     s.student_id = Number(text);
     s.waiting = 'choose_type';
     return showTypes(chatId);
   }
-  */
+  
+  
 
   
   /* ===== السورة ===== */
@@ -713,6 +705,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
