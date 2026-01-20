@@ -27,6 +27,14 @@ CREATE TABLE IF NOT EXISTS achievements (
 )
 `);
 
+db.exec(`
+CREATE TABLE IF NOT EXISTS students (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  student_id INTEGER UNIQUE,
+  student_name TEXT
+)
+`);
+
 const userStates = {};
 const QURAN_SURAHS = [
   "الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس",
@@ -346,6 +354,35 @@ ${last.notes}`;
   const s = userStates[chatId];
 
   /* ===== المعلم ===== */
+if (s.waiting === 'student_name') {
+  s.student_name = text;
+
+  // تحقق هل الطالب موجود مسبقًا؟
+  const existing = db.prepare(`SELECT * FROM students WHERE student_name=?`).get(text);
+
+  if (existing) {
+    // موجود مسبقًا، استخدم المعرف الموجود
+    s.student_id = existing.student_id;
+    s.waiting = 'choose_type';
+    return showTypes(chatId);
+  } else {
+    // جديد، اطلب المعرف
+    s.waiting = 'student_id';
+    return bot.sendMessage(chatId, 'اكتب معرف الطالب الرقمي:');
+  }
+}
+
+if (s.waiting === 'student_id') {
+  s.student_id = Number(text);
+
+  // أضف الطالب الجديد للقائمة
+  db.prepare(`INSERT INTO students (student_id, student_name) VALUES (?, ?)`).run(s.student_id, s.student_name);
+
+  s.waiting = 'choose_type';
+  return showTypes(chatId);
+}
+
+  /*
 
   if (s.waiting === 'student_name') {
     s.student_name = text;
@@ -358,6 +395,7 @@ ${last.notes}`;
     s.waiting = 'choose_type';
     return showTypes(chatId);
   }
+  */
 
   
   /* ===== السورة ===== */
@@ -568,6 +606,7 @@ function finishAchievement(chatId, username) {
     new Date().toISOString(),
     s.student_id || chatId
   );
+addStudentIfNotExist(s.student_id || chatId, s.student_name || username);
 
   sendToTeacher(r.lastInsertRowid);
 bot.sendMessage(
@@ -578,6 +617,15 @@ bot.sendMessage(
 
   delete userStates[chatId];
 }
+
+function addStudentIfNotExist(student_id, student_name) {
+  const exists = db.prepare(`SELECT 1 FROM students WHERE student_id=?`).get(student_id);
+  if (!exists) {
+    db.prepare(`INSERT INTO students (student_id, student_name) VALUES (?, ?)`)
+      .run(student_id, student_name);
+  }
+}
+
 
 function sendToTeacher(id) {
   const a = db.prepare(`SELECT * FROM achievements WHERE id=?`).get(id);
@@ -639,6 +687,9 @@ function sendAchievementCard(id) {
   bot.sendMessage(a.student_id, msg);
 }
 
+
+
+
 /*
 function sendAchievementCard(id) {
   const a = db.prepare(`SELECT * FROM achievements WHERE id=?`).get(id);
@@ -662,6 +713,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
