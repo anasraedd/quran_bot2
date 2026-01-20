@@ -339,7 +339,9 @@ ${last.notes}`;
 
   /* ===== غير مسجل ===== */
 
-  if (!userStates[chatId] || text.startsWith('/')) return;
+ if (text.startsWith('/')) return;
+if (!userStates[chatId] || !userStates[chatId].waiting) return;
+
 
   const s = userStates[chatId];
 
@@ -636,6 +638,7 @@ ${a.notes}
 }
 
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
