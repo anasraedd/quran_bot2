@@ -182,7 +182,7 @@ function normalizeArabic(text) {
     .trim();
 }
 
-const SURAH_MAP = SURAH_LIST.map(name => ({
+const SURAH_MAP = QURAN_SURAHS.map(name => ({
   original: name,
   normalized: normalizeArabic(name)
 }));
@@ -339,8 +339,8 @@ ${last.notes}`;
 
   /* ===== غير مسجل ===== */
 
- if (text.startsWith('/')) return;
-if (!userStates[chatId] || !userStates[chatId].waiting) return;
+ if (!userStates[chatId] || text.startsWith('/')) return;
+
 
 
   const s = userStates[chatId];
@@ -638,6 +638,7 @@ ${a.notes}
 }
 
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
