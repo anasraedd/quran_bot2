@@ -164,6 +164,19 @@ function getMaxAyah(surah) {
   return quranSurahs[surah] || null;
 }
 
+function normalizeSurah(text) {
+  if (!text) return null;
+
+  text = text
+    .replace(/سورة/g, '')
+    .replace(/\s+/g, '')
+    .trim();
+
+  return QURAN_SURAHS.find(s =>
+    s.replace(/\s+/g, '') === text
+  ) || null;
+}
+
 
 
 /* ================= KEYBOARDS ================= */
@@ -312,10 +325,22 @@ ${last.notes}`;
   /* ===== السورة ===== */
 
   if (s.waiting === 'surah') {
-    s.surah = text;
-    s.waiting = 'start';
-    return bot.sendMessage(chatId, 'من آية رقم:');
+
+  const surah = normalizeSurah(text);
+
+  if (!surah) {
+    return bot.sendMessage(chatId, '❌ اسم السورة غير موجود في القرآن الكريم');
   }
+
+  s.surah = surah;
+  s.waiting = 'start';
+
+  return bot.sendMessage(
+    chatId,
+    `✅ تم اختيار سورة ${surah}\nمن آية رقم:`
+  );
+}
+
 
 
   
@@ -572,6 +597,7 @@ ${a.notes}
 }
 
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
