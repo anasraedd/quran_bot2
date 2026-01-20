@@ -160,6 +160,42 @@ const quranSurahs = {
   'الناس': 6
 };
 
+function normalizeArabic(text) {
+  return text
+    .toLowerCase()
+    // إزالة التشكيل
+    .replace(/[ًٌٍَُِّْٰ]/g, '')
+    // توحيد الهمزات
+    .replace(/[أإآ]/g, 'ا')
+    // ياء وألف مقصورة
+    .replace(/ى/g, 'ي')
+    // تاء مربوطة
+    .replace(/ة/g, 'ه')
+    // واو وهمزة
+    .replace(/ؤ/g, 'و')
+    // ياء وهمزة
+    .replace(/ئ/g, 'ي')
+    // حذف كلمة سورة
+    .replace(/سورة/g, '')
+    // مسافات
+    .replace(/\s+/g, '')
+    .trim();
+}
+
+const SURAH_MAP = SURAH_LIST.map(name => ({
+  original: name,
+  normalized: normalizeArabic(name)
+}));
+
+function getSurahSmart(input) {
+  const n = normalizeArabic(input);
+
+  const found = SURAH_MAP.find(s => s.normalized === n);
+
+  return found ? found.original : null;
+}
+
+
 function getMaxAyah(surah) {
   return quranSurahs[surah] || null;
 }
@@ -324,12 +360,15 @@ ${last.notes}`;
   
   /* ===== السورة ===== */
 
-  if (s.waiting === 'surah') {
+if (s.waiting === 'surah') {
 
-  const surah = normalizeSurah(text);
+  const surah = getSurahSmart(text);
 
   if (!surah) {
-    return bot.sendMessage(chatId, '❌ اسم السورة غير موجود في القرآن الكريم');
+    return bot.sendMessage(
+      chatId,
+      '❌ اسم السورة غير معروف\nاكتب الاسم الصحيح مثل: البقرة، النساء، يس'
+    );
   }
 
   s.surah = surah;
@@ -597,6 +636,7 @@ ${a.notes}
 }
 
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
