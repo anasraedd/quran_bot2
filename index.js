@@ -619,6 +619,29 @@ function saveRating(id, rating, notes) {
 
 function sendAchievementCard(id) {
   const a = db.prepare(`SELECT * FROM achievements WHERE id=?`).get(id);
+  if (!a) return;
+
+  let msg = `🎉 تم تقييم إنجازك\n\n`;
+
+  if (a.type !== 'تعليم') {
+    // الحفظ أو المراجعة
+    msg += `📖 السورة: ${a.surah}\n`;
+    msg += `🔢 من ${a.start_ayah} إلى ${a.end_ayah}\n\n`;
+  } else {
+    // تعليم
+    msg += `📝 تفاصيل التعليم:\n${a.details}\n\n`;
+  }
+
+  msg += `⭐ التقييم: ${'⭐'.repeat(a.rating)}\n\n`;
+  msg += `💬 ملاحظات المعلم:\n${a.notes}\n\n`;
+  msg += `بارك الله فيك 🌿`;
+
+  bot.sendMessage(a.student_id, msg);
+}
+
+/*
+function sendAchievementCard(id) {
+  const a = db.prepare(`SELECT * FROM achievements WHERE id=?`).get(id);
 
   const msg =
 `🎉 تم تقييم إنجازك
@@ -637,7 +660,9 @@ ${a.notes}
   bot.sendMessage(a.student_id, msg);
 }
 
+*/
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
