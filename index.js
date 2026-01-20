@@ -289,6 +289,38 @@ bot.on('message', async msg => {
 
   /* ===== إضافة إنجاز ===== */
 
+if (text === '➕ إضافة إنجاز') {
+  // تعيين حالة المستخدم
+  userStates[chatId] = { isTeacher: chatId === OWNER_ID };
+
+  bot.sendMessage(chatId, '✅ بدأ تسجيل الإنجاز', cancelKeyboard);
+
+  // 👨‍🏫 مالك البوت يظهر له قائمة الطلاب المسجلين
+  if (chatId === OWNER_ID) {
+    // جلب الطلاب من قاعدة البيانات
+    const students = db.prepare(`SELECT student_id, student_name FROM students`).all();
+
+    if (students.length === 0) {
+      // إذا القائمة فارغة
+      return bot.sendMessage(chatId, '⚠️ لا يوجد طلاب مدرجين على النظام.');
+    }
+
+    // إعداد أزرار لكل طالب
+    const buttons = students.map(s => [{ text: s.student_name, callback_data: `choose_student_${s.student_id}` }]);
+
+    userStates[chatId].waiting = 'choose_student'; // لتحديد أننا ننتظر اختيار الطالب
+
+    return bot.sendMessage(chatId, 'اختر الطالب لتسجيل الإنجاز له:', {
+      reply_markup: { inline_keyboard: buttons }
+    });
+  }
+
+  // 👤 طالب عادي يبدأ مباشرة اختيار النوع
+  userStates[chatId].waiting = 'choose_type';
+  return showTypes(chatId);
+}
+
+  /*
   if (text === '➕ إضافة إنجاز') {
     userStates[chatId] = { isTeacher: chatId === OWNER_ID };
 
@@ -302,6 +334,7 @@ bot.on('message', async msg => {
     userStates[chatId].waiting = 'choose_type';
     return showTypes(chatId);
   }
+  */
 
   /* ===== إلغاء ===== */
 
@@ -364,6 +397,7 @@ ${last.notes}`;
     return bot.sendMessage(chatId, 'اكتب معرف الطالب الرقمي:');
   }
 */
+  /*
    if (s.isTeacher) {
     const students = db.prepare('SELECT * FROM students').all();
 
@@ -379,13 +413,14 @@ ${last.notes}`;
     return bot.sendMessage(chatId, 'اختر الطالب:', {
       reply_markup: { inline_keyboard: keyboard }
     });
-     */
+     
   }
   if (s.waiting === 'student_id') {
     s.student_id = Number(text);
     s.waiting = 'choose_type';
     return showTypes(chatId);
   }
+  */
   
   
 
@@ -490,6 +525,32 @@ bot.on('callback_query', q => {
   const data = q.data;
 
   bot.answerCallbackQuery(q.id);
+
+  // 👨‍🏫 المعلم يختار طالب من القائمة
+if (data.startsWith('choose_student_')) {
+  const chatState = userStates[chatId];
+  if (!chatState || !chatState.isTeacher) return;
+
+  // استخراج معرف الطالب من callback_data
+  const studentId = Number(data.replace('choose_student_', ''));
+
+  // جلب اسم الطالب من قاعدة البيانات
+  const student = db.prepare(`SELECT student_name FROM students WHERE student_id=?`).get(studentId);
+  if (!student) {
+    return bot.sendMessage(chatId, '⚠️ هذا الطالب غير موجود في النظام.');
+  }
+
+  // حفظ بيانات الطالب في الحالة
+  chatState.student_id = studentId;
+  chatState.student_name = student.student_name;
+
+  // تغيير الحالة لبدء اختيار نوع الإنجاز
+  chatState.waiting = 'choose_type';
+
+  // عرض خيارات النوع مباشرة
+  return showTypes(chatId);
+}
+
 
   /* ===== اختيار النوع ===== */
 
@@ -598,7 +659,7 @@ function finishAchievement(chatId, username) {
     new Date().toISOString(),
     s.student_id || chatId
   );
-addStudentIfNotExist(s.student_id || chatId, s.student_name || username);
+  addStudentIfNotExist(chatId, username);
 
   sendToTeacher(r.lastInsertRowid);
 bot.sendMessage(
@@ -617,6 +678,7 @@ function addStudentIfNotExist(student_id, student_name) {
       .run(student_id, student_name);
   }
 }
+
 
 
 function sendToTeacher(id) {
@@ -705,6 +767,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
