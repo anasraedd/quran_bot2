@@ -302,6 +302,7 @@ if (text === '➕ إضافة إنجاز') {
 
     if (students.length === 0) {
       // إذا القائمة فارغة
+     cancelKeyboard();
       return bot.sendMessage(chatId, '⚠️ لا يوجد طلاب مدرجين على النظام.');
     }
 
@@ -767,6 +768,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
