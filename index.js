@@ -301,6 +301,7 @@ if (text === '➕ إضافة إنجاز') {
 const students = db.prepare(`SELECT * FROM students`).all();
 
 if (students.length === 0) {
+  cancelKeyboard();
   return bot.sendMessage(chatId, 'لا يوجد طلاب مدرجين في النظام.');
 }
 
@@ -827,6 +828,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
