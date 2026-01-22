@@ -286,7 +286,7 @@ bot.onText(/\/start/, msg => {
 bot.on('message', async msg => {
   const chatId = msg.chat.id;
   const text = msg.text;
-
+  const s = userStates[chatId];
   if (s?.waiting === 'edit_student_name') {
   const newName = text.trim();
 
@@ -826,6 +826,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
