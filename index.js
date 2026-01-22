@@ -258,7 +258,8 @@ const studentMenu = {
 const teacherMenu = {
   reply_markup: {
     keyboard: [
-      [{ text: '➕ إضافة إنجاز' }],
+      [{ text: '➕ إضافة إنجاز لطالب' }],
+      [{ text: '🧭 لوحة التحكم' }],
       [{ text: '📊 الإنجازات غير المقيمة' }]
     ],
     resize_keyboard: true
@@ -563,6 +564,15 @@ if (s.waiting === 'end') {
     delete userStates[chatId];
     return bot.sendMessage(chatId, '✅ تم التقييم بنجاح', teacherMenu);
   }
+
+  if (text === '🧭 لوحة التحكم' && chatId === OWNER_ID) {
+  return bot.sendMessage(
+    chatId,
+    '🧭 لوحة التحكم\n\n(سيتم إضافة الخيارات لاحقًا)',
+    teacherMenu
+  );
+}
+
 });
 
 /* ================= CALLBACK ================= */
@@ -827,6 +837,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
