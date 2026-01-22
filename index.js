@@ -287,6 +287,25 @@ bot.on('message', async msg => {
   const chatId = msg.chat.id;
   const text = msg.text;
 
+  if (s?.waiting === 'edit_student_name') {
+  const newName = text.trim();
+
+  if (newName.length < 2) {
+    return bot.sendMessage(chatId, '❌ الاسم غير صالح.');
+  }
+
+  db.prepare(`
+    UPDATE students
+    SET student_name=?
+    WHERE student_id=?
+  `).run(newName, s.student_id);
+
+  bot.sendMessage(chatId, `✅ تم تعديل الاسم إلى: ${newName}`);
+
+  delete userStates[chatId];
+  return;
+}
+
   /* ===== إضافة إنجاز ===== */
 
 if (text === '➕ إضافة إنجاز') {
@@ -297,12 +316,37 @@ if (text === '➕ إضافة إنجاز') {
 
   // 👨‍🏫 مالك البوت يظهر له قائمة الطلاب المسجلين
   if (chatId === OWNER_ID) {
+const students = db.prepare(`SELECT * FROM students`).all();
+
+if (students.length === 0) {
+  return bot.sendMessage(chatId, 'لا يوجد طلاب مدرجين في النظام.');
+}
+
+const keyboard = students.map(s => ([
+  {
+    text: `👤 ${s.student_name}`,
+    callback_data: `choose_student_${s.student_id}`
+  },
+  {
+    text: '✏️ تعديل الاسم',
+    callback_data: `edit_student_${s.student_id}`
+  }
+]));
+
+return bot.sendMessage(chatId, 'اختر طالبًا:', {
+  reply_markup: {
+    inline_keyboard: keyboard
+  }
+});
+
+
+    /*
     // جلب الطلاب من قاعدة البيانات
     const students = db.prepare(`SELECT student_id, student_name FROM students`).all();
 
     if (students.length === 0) {
       // إذا القائمة فارغة
-     cancelKeyboard();
+     //cancelKeyboard();
       return bot.sendMessage(chatId, '⚠️ لا يوجد طلاب مدرجين على النظام.');
     }
 
@@ -314,6 +358,7 @@ if (text === '➕ إضافة إنجاز') {
     return bot.sendMessage(chatId, 'اختر الطالب لتسجيل الإنجاز له:', {
       reply_markup: { inline_keyboard: buttons }
     });
+    */
   }
 
   // 👤 طالب عادي يبدأ مباشرة اختيار النوع
@@ -552,6 +597,19 @@ if (data.startsWith('choose_student_')) {
   return showTypes(chatId);
 }
 
+  if (data.startsWith('edit_student_')) {
+  const studentId = Number(data.replace('edit_student_', ''));
+
+  userStates[chatId] = {
+    isTeacher: true,
+    waiting: 'edit_student_name',
+    student_id: studentId
+  };
+
+  return bot.sendMessage(chatId, '✏️ اكتب الاسم الجديد للطالب:');
+}
+
+
 
   /* ===== اختيار النوع ===== */
 
@@ -768,6 +826,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
