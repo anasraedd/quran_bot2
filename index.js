@@ -286,25 +286,7 @@ bot.onText(/\/start/, msg => {
 bot.on('message', async msg => {
   const chatId = msg.chat.id;
   const text = msg.text;
-  const s = userStates[chatId];
-  if (s?.waiting === 'edit_student_name') {
-  const newName = text.trim();
 
-  if (newName.length < 2) {
-    return bot.sendMessage(chatId, '❌ الاسم غير صالح.');
-  }
-
-  db.prepare(`
-    UPDATE students
-    SET student_name=?
-    WHERE student_id=?
-  `).run(newName, s.student_id);
-
-  bot.sendMessage(chatId, `✅ تم تعديل الاسم إلى: ${newName}`);
-
-  delete userStates[chatId];
-  return;
-}
 
   /* ===== إضافة إنجاز ===== */
 
@@ -431,6 +413,25 @@ ${last.notes}`;
 
 
   const s = userStates[chatId];
+    if (s?.waiting === 'edit_student_name') {
+  const newName = text.trim();
+
+  if (newName.length < 2) {
+    return bot.sendMessage(chatId, '❌ الاسم غير صالح.');
+  }
+
+  db.prepare(`
+    UPDATE students
+    SET student_name=?
+    WHERE student_id=?
+  `).run(newName, s.student_id);
+
+  bot.sendMessage(chatId, `✅ تم تعديل الاسم إلى: ${newName}`);
+
+  delete userStates[chatId];
+  return;
+}
+
 
   /* ===== المعلم ===== */
 
@@ -826,6 +827,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
