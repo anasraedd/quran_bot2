@@ -221,6 +221,16 @@ function normalizeSurah(text) {
   ) || null;
 }
 
+const axios = require('axios');
+
+async function getStudentsForTeacher(teacherId) {
+  const res = await axios.post(SCRIPT_URL, {
+    action: "getStudentsByTeacher",
+    teacher_id: teacherId
+  });
+
+  return res.data;
+}
 
 
 /* ================= KEYBOARDS ================= */
@@ -837,6 +847,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
