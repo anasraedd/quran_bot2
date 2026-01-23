@@ -301,7 +301,7 @@ bot.on('message', async msg => {
 
   /* ===== إضافة إنجاز ===== */
 
-if (text === '➕ إضافة إنجاز') {
+if (text === '➕ إضافة إنجاز' || text === '➕ إضافة إنجاز لطالب' ) {
   // تعيين حالة المستخدم
   userStates[chatId] = { isTeacher: chatId === OWNER_ID };
 
@@ -847,6 +847,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
