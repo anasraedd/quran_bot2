@@ -300,8 +300,12 @@ bot.on('message', async msg => {
 
 
   /* ===== إضافة إنجاز ===== */
-const validTexts = ['➕ إضافة إنجاز', '➕ إضافة إنجاز لطالب'];
-if (validTexts.includes(text)) {
+
+  // || text === '➕ إضافة إنجاز لطالب'
+if (if (text === '➕ إضافة إنجاز') {
+  // الكود هنا
+}
+ ) {
   // تعيين حالة المستخدم
   userStates[chatId] = { isTeacher: chatId === OWNER_ID };
 
@@ -847,6 +851,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
