@@ -508,8 +508,8 @@ if (userStates[chatId]?.waiting === 'new_user_input') {
 
 
 
-  /* اختيار نوع الحساب */
-  /*
+   اختيار نوع الحساب 
+  
   if (userStates[chatId]?.waiting === 'new_user_id') {
     const input = text.trim();
     userStates[chatId].user_id = input;
@@ -1090,6 +1090,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
