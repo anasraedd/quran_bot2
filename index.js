@@ -225,6 +225,16 @@ const axios = require('axios');
 
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwIgQGjNflpsRwb-wkRyOD_3Q1oWzFnvW2EEQqHJ8LWGf0sVHOV_d41H4NyJsGfGT-n/exec";
 
+async function testPing() {
+  const res = await axios.post(SCRIPT_URL, {
+    action: "ping"
+  });
+
+  console.log(res.data);
+}
+
+testPing();
+
 async function callSheet(action, data = {}) {
   const res = await axios.post(SCRIPT_URL, {
     action,
@@ -861,6 +871,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
