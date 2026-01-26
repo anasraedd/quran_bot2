@@ -350,13 +350,13 @@ bot.on('message', async msg => {
   const s = userStates[chatId];
 
     if (text === '🔐 دخول') {
-    s.step = 'login_username';
+    s.waiting = 'login_username'
     return bot.sendMessage(chatId, '🔹 أدخل اسم المستخدم أو رقم الهوية:');
   }
 
    // إدخال اسم المستخدم
   // =========================
-  if (s.step === 'login_username') {
+  if (  s.waiting = 'login_username') {
     s.username = text;
 
     const res = await axios.post(SCRIPT_URL, {
@@ -1100,6 +1100,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
