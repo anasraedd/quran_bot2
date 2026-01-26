@@ -693,7 +693,7 @@ ${last.notes}`;
 
 
 
-  const s = userStates[chatId];
+ // const s = userStates[chatId];
     if (s?.waiting === 'edit_student_name') {
   const newName = text.trim();
 
@@ -1137,6 +1137,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
