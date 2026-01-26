@@ -324,91 +324,136 @@ bot.onText(/\/start/, msg => {
 
 bot.on('message', async msg => {
   const chatId = msg.chat.id;
-  const text = msg.text;
   
-  // تأكد أن هناك حالة للمستخدم
+  const text = msg.text?.trim();
+
+  // تأكد من وجود حالة للمستخدم
   if (!userStates[chatId]) {
     userStates[chatId] = {};
   }
-  const s = userStates[chatId]; // الآن s معرف قبل أي استخدام
 
-  // خطوة 1: بدأ إنشاء الحساب
+  const s = userStates[chatId];
+
+  // =============================
+  // خطوة 1: بدء إنشاء الحساب
+  // =============================
   if (text === 'إنشاء حساب') {
     s.waiting = 'new_user_id';
     return bot.sendMessage(chatId, '🔹 أدخل اسم المستخدم أو رقم الهوية:');
   }
 
-  // خطوة 2: إدخال اسم المستخدم أو رقم الهوية
+  // =============================
+  // خطوة 2: إدخال اسم المستخدم
+  // =============================
   if (s.waiting === 'new_user_id') {
+
     s.username = text;
 
-    // استدعاء Google Sheet للتحقق إذا كان الاسم موجود مسبقًا
-    const res = await axios.post(SCRIPT_URL, {
-      action: 'checkUsername',
-      username: s.username
-    });
-
-    if (res.data.exists) {
-      return bot.sendMessage(chatId, '❌ اسم المستخدم موجود بالفعل. أدخل اسمًا آخر:');
+    let res;
+    try {
+      res = await axios.post(SCRIPT_URL, {
+        action: 'checkUsername',
+        username: s.username
+      });
+    } catch (err) {
+      return bot.sendMessage(chatId, '⚠️ خطأ في الاتصال مع قاعدة البيانات');
     }
 
-    // إذا لم يكن موجودًا، ننتقل لاختيار نوع الحساب
+    if (res.data?.exists === true) {
+      return bot.sendMessage(chatId, '❌ اسم المستخدم موجود بالفعل، أدخل اسمًا آخر:');
+    }
+
     s.waiting = 'role';
+
     return bot.sendMessage(chatId, '🔹 اختر نوع الحساب:', {
       reply_markup: {
-        keyboard: [['admin', 'teacher', 'student']],
+        keyboard: [
+          ['admin'],
+          ['teacher'],
+          ['student']
+        ],
+        resize_keyboard: true,
         one_time_keyboard: true
       }
     });
   }
 
+  // =============================
   // خطوة 3: اختيار نوع الحساب
+  // =============================
   if (s.waiting === 'role') {
-    const data = text.toLowerCase();
-    if (!['admin', 'teacher', 'student'].includes(data)) {
-      return bot.sendMessage(chatId, '❌ اختر خيارًا صحيحًا: admin، teacher، أو student');
+
+    const role = text.toLowerCase();
+
+    if (!['admin', 'teacher', 'student'].includes(role)) {
+      return bot.sendMessage(chatId, '❌ اختر نوع حساب صحيح من الأزرار');
     }
 
-    s.role = data;
+    s.role = role;
     s.waiting = 'full_name';
+
     return bot.sendMessage(chatId, '🔹 أدخل الاسم الرباعي:');
   }
 
-  // خطوة 4: إدخال الاسم الرباعي
+  // =============================
+  // خطوة 4: الاسم الرباعي
+  // =============================
   if (s.waiting === 'full_name') {
+
     s.full_name = text;
     s.waiting = 'phone_number';
+
     return bot.sendMessage(chatId, '🔹 أدخل رقم الجوال:');
   }
 
-  // خطوة 5: إدخال رقم الجوال
+  // =============================
+  // خطوة 5: رقم الجوال
+  // =============================
   if (s.waiting === 'phone_number') {
+
     s.phone_number = text;
     s.waiting = 'password';
+
     return bot.sendMessage(chatId, '🔹 أدخل كلمة المرور:');
   }
 
-  // خطوة 6: إدخال كلمة المرور
+  // =============================
+  // خطوة 6: كلمة المرور
+  // =============================
   if (s.waiting === 'password') {
+
     s.password = text;
     s.created_at = new Date().toISOString();
     s.is_active = true;
 
-    // إرسال البيانات إلى Google Sheet لإنشاء المستخدم
-    const res = await axios.post(SCRIPT_URL, {
-      action: 'addUser',
-      user: s
-    });
+    let res;
 
-    if (res.data.ok) {
-      delete userStates[chatId]; // إعادة تعيين الحالة
-      return bot.sendMessage(chatId, '✅ تم إنشاء الحساب بنجاح!');
-    } else {
-      return bot.sendMessage(chatId, '❌ حدث خطأ أثناء إنشاء الحساب، حاول مرة أخرى.');
+    try {
+      res = await axios.post(SCRIPT_URL, {
+        action: 'addUser',
+        user: {
+          username: s.username,
+          password: s.password,
+          role: s.role,
+          full_name: s.full_name,
+          phone_number: s.phone_number,
+          created_at: s.created_at,
+          is_active: s.is_active
+        }
+      });
+    } catch (err) {
+      return bot.sendMessage(chatId, '⚠️ فشل الاتصال مع Google Sheet');
     }
+
+    if (res.data?.ok === true) {
+      delete userStates[chatId];
+      return bot.sendMessage(chatId, '✅ تم إنشاء الحساب بنجاح');
+    }
+
+    return bot.sendMessage(chatId, '❌ لم يتم إنشاء الحساب، حاول مرة أخرى');
   }
 
-  
+
   // عند الضغط على زر إنشاء حساب"
 
 
@@ -1092,6 +1137,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
