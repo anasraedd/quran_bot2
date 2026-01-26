@@ -236,39 +236,40 @@ if (text === 'إنشاء حساب') {
 if (userStates[chatId]?.waiting === 'new_user_input') {
   const newUsername = text.trim();
 
-  // استدعاء Google Sheets للتحقق من وجود اسم المستخدم
-  try {
-    const res = await axios.post(SCRIPT_URL, {
-      action: "checkUser",
-      username: newUsername
-    });
+  (async () => {
+    try {
+      const res = await axios.post(SCRIPT_URL, {
+        action: "checkUser",
+        username: newUsername
+      });
 
-    if (res.data.exists) {
-      return bot.sendMessage(chatId, '⚠️ هذا المستخدم موجود بالفعل، أدخل اسمًا آخر:');
-    }
-
-    // إذا لم يكن موجود، نسجل الاسم مؤقتًا في الحالة
-    userStates[chatId].new_user = newUsername;
-    userStates[chatId].waiting = 'choose_role';
-
-    // نطلب اختيار نوع الحساب
-    const roleKeyboard = {
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: 'طالب', callback_data: 'role_student' }],
-          [{ text: 'معلم', callback_data: 'role_teacher' }],
-          [{ text: 'ادمن', callback_data: 'role_admin' }]
-        ]
+      if (res.data.exists) {
+        return bot.sendMessage(chatId, '⚠️ هذا المستخدم موجود بالفعل، أدخل اسمًا آخر:');
       }
-    };
 
-    return bot.sendMessage(chatId, '✅ اختر نوع الحساب:', roleKeyboard);
+      // حفظ الاسم مؤقتًا
+      userStates[chatId].new_user = newUsername;
+      userStates[chatId].waiting = 'choose_role';
 
-  } catch (err) {
-    console.error(err);
-    return bot.sendMessage(chatId, '❌ حدث خطأ أثناء التحقق من المستخدم، حاول لاحقًا.');
-  }
+      const roleKeyboard = {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: 'طالب', callback_data: 'role_student' }],
+            [{ text: 'معلم', callback_data: 'role_teacher' }],
+            [{ text: 'ادمن', callback_data: 'role_admin' }]
+          ]
+        }
+      };
+
+      return bot.sendMessage(chatId, '✅ اختر نوع الحساب:', roleKeyboard);
+
+    } catch (err) {
+      console.error(err);
+      return bot.sendMessage(chatId, '❌ حدث خطأ أثناء التحقق من المستخدم، حاول لاحقًا.');
+    }
+  })(); // استدعاء الدالة مباشرة
 }
+
 
 /*
 
@@ -936,6 +937,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
