@@ -223,7 +223,7 @@ function normalizeSurah(text) {
 
 const axios = require('axios');
 
-const SCRIPT_URL = "https://script.google.com/macros/s/XXXX/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwIgQGjNflpsRwb-wkRyOD_3Q1oWzFnvW2EEQqHJ8LWGf0sVHOV_d41H4NyJsGfGT-n/exec";
 
 async function callSheet(action, data = {}) {
   const res = await axios.post(SCRIPT_URL, {
@@ -861,6 +861,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
