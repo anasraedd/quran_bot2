@@ -353,6 +353,7 @@ if (userStates[chatId]?.waiting === 'new_user_input') {
 
       const roleKeyboard = {
         reply_markup: {
+          
           inline_keyboard: [
             [{ text: 'طالب', callback_data: 'role_student' }],
             [{ text: 'معلم', callback_data: 'role_teacher' }],
@@ -683,7 +684,7 @@ bot.on('callback_query', q => {
   if (!userStates[chatId]) userStates[chatId] = {};
 
   // حفظ نوع الحساب الذي اختاره
-  if (['admin', 'teacher', 'student'].includes(data)) {
+  if (['role_admin', 'role_teacher', 'role_student'].includes(data)) {
     userStates[chatId].account_type = data;
     userStates[chatId].waiting = 'full_name'; // الآن ينتظر الاسم الرباعي
 
@@ -952,6 +953,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
