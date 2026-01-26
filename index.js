@@ -7,6 +7,9 @@ const OWNER_ID = 7405584377;
 const bot = new TelegramBot(TOKEN, { polling: true });
 const db = new Database('bot_data.db');
 
+const userStates = {};
+
+
 /* ================= DATABASE ================= */
 
 db.exec(`
@@ -35,7 +38,7 @@ CREATE TABLE IF NOT EXISTS students (
 )
 `);
 
-const userStates = {};
+
 const QURAN_SURAHS = [
   "الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس",
   "هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه",
@@ -276,7 +279,8 @@ const adminMenu = {
   reply_markup: {
     keyboard: [
       [{ text: 'إنشاء حساب' }],
-      [{ text: '🧭 لوحة التحكم' }]
+      [{ text: '🧭 لوحة التحكم' }],
+       ['🚪 تسجيل خروج']
     ],
     resize_keyboard: true
   }
@@ -286,19 +290,21 @@ const studentMenu = {
   reply_markup: {
     keyboard: [
       [{ text: '➕ إضافة إنجاز' }],
-      [{ text: '📘 آخر إنجاز' }]
+      [{ text: '📘 آخر إنجاز' }],
+       ['🚪 تسجيل خروج']
     ],
     resize_keyboard: true
   }
 };
-const login = {
+const mainKeyboard = {
   reply_markup: {
     keyboard: [
-      [{ text: '🔐 دخول' }]
+      ['🔐 دخول']
     ],
     resize_keyboard: true
   }
 };
+
 
 
 const teacherMenu = {
@@ -306,7 +312,8 @@ const teacherMenu = {
     keyboard: [
       [{ text: '➕ إضافة إنجاز لطالب' }],
       [{ text: '🧭 لوحة التحكم' }],
-      [{ text: '📊 الإنجازات غير المقيمة' }]
+      [{ text: '📊 الإنجازات غير المقيمة' }],
+       ['🚪 تسجيل خروج']
     ],
     resize_keyboard: true
   }
@@ -325,7 +332,7 @@ bot.onText(/\/start/, msg => {
   if (msg.chat.id === OWNER_ID)
     bot.sendMessage(msg.chat.id, 'مرحبًا بك 👨‍🏫', adminMenu);
   else
-    bot.sendMessage(msg.chat.id, 'مرحبًا بك 🌿', login);
+    bot.sendMessage(msg.chat.id, 'مرحبًا بك 🌿', mainKeyboard);
 });
 
 /* ================= MESSAGE ================= */
@@ -342,6 +349,71 @@ bot.on('message', async msg => {
 
   const s = userStates[chatId];
 
+    if (text === '🔐 دخول') {
+    s.step = 'login_username';
+    return bot.sendMessage(chatId, '🔹 أدخل اسم المستخدم أو رقم الهوية:');
+  }
+
+   // إدخال اسم المستخدم
+  // =========================
+  if (s.step === 'login_username') {
+    s.username = text;
+
+    const res = await axios.post(SCRIPT_URL, {
+      action: 'checkLoginUsername',
+      username: text
+    });
+
+    if (!res.data.exists) {
+      return bot.sendMessage(chatId, '❌ المستخدم غير موجود، حاول مرة أخرى:');
+    }
+
+    s.step = 'login_password';
+    return bot.sendMessage(chatId, '🔹 أدخل كلمة المرور:');
+  }
+
+  // =========================
+  // إدخال كلمة المرور
+  // =========================
+  if (s.step === 'login_password') {
+    const res = await axios.post(SCRIPT_URL, {
+      action: 'checkPassword',
+      username: s.username,
+      password: text
+    });
+
+    if (!res.data.ok) {
+      return bot.sendMessage(chatId, '❌ كلمة المرور غير صحيحة، حاول مرة أخرى:');
+    }
+
+    // نجاح تسجيل الدخول
+    const fullName = res.data.full_name;
+    const role = res.data.role;
+
+    delete userStates[chatId];
+
+    // أزرار حسب الدور
+    let keyboard = [];
+
+    if (role === 'student') {
+      keyboard = studentMenu;
+    } else if (role === 'teacher') {
+      keyboard = teacherMenu;
+    } else if (role === 'admin') {
+      keyboard = adminMenu;
+    }
+
+    return bot.sendMessage(
+      chatId,
+      `🌸 مرحباً ${fullName}`,
+      {
+        reply_markup: {
+          keyboard,
+          resize_keyboard: true
+        }
+      }
+    );
+  }
   // =============================
   // خطوة 1: بدء إنشاء الحساب
   // =============================
@@ -1026,6 +1098,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
