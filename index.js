@@ -424,7 +424,7 @@ if (userStates[chatId]?.waiting === 'new_user_input') {
           password: s.password,
           role: s.role,
           full_name: s.full_name,
-          phone_number: 'kmkiomnij',
+          phone_number: s.full_name,
           created_at: s.created_at,
           is_active: s.is_active
         }
@@ -1131,6 +1131,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
