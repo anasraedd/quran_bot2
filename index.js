@@ -225,7 +225,7 @@ function normalizeSurah(text) {
 }
 
 // ثابت URL السكربت على Google Sheets
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw3MVedBcTXM39l9e5OPumLfAuzJrIUAU-0VrCLw5WSkhulRSp_b8iYis7c8OietrpM/exec"; // ضع رابط السكربت هنا
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPV9EXGvhERyCBipnv2U77BEuOz_Yf2RQ2iU4TNf9dP-UwnMrFwbKLyR4K-juty_I/exec"; // ضع رابط السكربت هنا
 
 const axios = require('axios');
 
@@ -361,7 +361,8 @@ bot.on('message', async msg => {
 
     const res = await axios.post(SCRIPT_URL, {
       action: 'checkLoginUsername',
-      username: text
+      username: text,
+      telegram_id: chatId
     });
 
     if (!res.data.exists) {
@@ -379,7 +380,8 @@ bot.on('message', async msg => {
     const res = await axios.post(SCRIPT_URL, {
       action: 'checkPassword',
       username: s.username,
-      password: text
+      password: text,
+      telegram_id: chatId
     });
 
     if (!res.data.ok) {
@@ -1098,6 +1100,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
