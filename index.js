@@ -222,7 +222,7 @@ function normalizeSurah(text) {
 }
 
 // ثابت URL السكربت على Google Sheets
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxBi16vu5T_AHQP9zxYETevf7Sxtd7VOtnznc7LJcAmzUTy08kxfodgDrFe7k4T52s1/exec"; // ضع رابط السكربت هنا
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw3MVedBcTXM39l9e5OPumLfAuzJrIUAU-0VrCLw5WSkhulRSp_b8iYis7c8OietrpM/exec"; // ضع رابط السكربت هنا
 
 const axios = require('axios');
 
@@ -430,6 +430,9 @@ if (userStates[chatId]?.waiting === 'new_user_input') {
     } catch (err) {
       return bot.sendMessage(chatId, '⚠️ فشل الاتصال مع Google Sheet');
     }
+if (!res.data.ok && res.data.message === 'PASSWORD_EXISTS') {
+  return bot.sendMessage(chatId, '❌ كلمة المرور مستخدمة مسبقًا، أدخل كلمة أخرى:');
+}
 
     if (res.data?.ok === true) {
       delete userStates[chatId];
@@ -485,7 +488,7 @@ if (userStates[chatId]?.waiting === 'new_user_input') {
       console.error(err);
       return bot.sendMessage(chatId, '❌ حدث خطأ أثناء التحقق من المستخدم، حاول لاحقًا.');
     }
-  })(); // استدعاء الدالة مباشرة
+  })(); //استدعاء الدالة مباشرة
 }
 
   // استقبال الاسم الرباعي
@@ -1123,6 +1126,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
