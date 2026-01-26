@@ -337,14 +337,12 @@ bot.on('message', async msg => {
   // =============================
   // خطوة 1: بدء إنشاء الحساب
   // =============================
-  if (text === 'إنشاء حساب') {
-    s.waiting = 'new_user_id';
-    return bot.sendMessage(chatId, '🔹 أدخل اسم المستخدم أو رقم الهوية:');
-  }
+if (text === 'إنشاء حساب') {
+  userStates[chatId] = { waiting: 'new_user_input' };
+  return bot.sendMessage(chatId, '🔹 أدخل اسم المستخدم أو رقم الهوية:');
+}
 
-  // =============================
-  // خطوة 2: إدخال اسم المستخدم
-  // =============================
+// معالجة الإدخال من الادمن
 if (userStates[chatId]?.waiting === 'new_user_input') {
   const newUsername = text.trim();
 
@@ -382,25 +380,6 @@ if (userStates[chatId]?.waiting === 'new_user_input') {
     }
   })(); // استدعاء الدالة مباشرة
 }
-
-
-  // =============================
-  // خطوة 3: اختيار نوع الحساب
-  // =============================
-  if (s.waiting === 'role') {
-
-    const role = text.toLowerCase();
-
-    if (!['admin', 'teacher', 'student'].includes(role)) {
-      return bot.sendMessage(chatId, '❌ اختر نوع حساب صحيح من الأزرار');
-    }
-
-    s.role = role;
-    s.waiting = 'full_name';
-
-    return bot.sendMessage(chatId, '🔹 أدخل الاسم الرباعي:');
-  }
-  
 
   // =============================
   // خطوة 4: الاسم الرباعي
@@ -1144,6 +1123,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
