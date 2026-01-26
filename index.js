@@ -234,6 +234,7 @@ async function testPing() {
 }
 
 testPing();
+/*
 
 async function callSheet(action, data = {}) {
   const res = await axios.post(SCRIPT_URL, {
@@ -242,6 +243,7 @@ async function callSheet(action, data = {}) {
   });
   return res.data;
 }
+*/
 /*
 const axios = require('axios');
 
@@ -871,6 +873,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
