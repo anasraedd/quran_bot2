@@ -223,6 +223,18 @@ function normalizeSurah(text) {
 
 const axios = require('axios');
 
+const SCRIPT_URL = "https://script.google.com/macros/s/XXXX/exec";
+
+async function callSheet(action, data = {}) {
+  const res = await axios.post(SCRIPT_URL, {
+    action,
+    ...data
+  });
+  return res.data;
+}
+/*
+const axios = require('axios');
+
 async function getStudentsForTeacher(teacherId) {
   const res = await axios.post(SCRIPT_URL, {
     action: "getStudentsByTeacher",
@@ -231,7 +243,7 @@ async function getStudentsForTeacher(teacherId) {
 
   return res.data;
 }
-
+*/
 
 /* ================= KEYBOARDS ================= */
 /* ========= لوحة اختيار السورة ========= */
@@ -849,6 +861,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
