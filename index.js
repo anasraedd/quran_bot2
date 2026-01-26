@@ -399,7 +399,7 @@ if (userStates[chatId]?.waiting === 'new_user_input') {
   // =============================
   if (s.waiting === 'phone_number') {
 
-    s.phone_number = 'text;
+    s.phone_number = text;
     s.waiting = 'password';
 
     return bot.sendMessage(chatId, '🔹 أدخل كلمة المرور:');
@@ -424,7 +424,7 @@ if (userStates[chatId]?.waiting === 'new_user_input') {
           password: s.password,
           role: s.role,
           full_name: s.full_name,
-          phone_number: s.phone_number,
+          phone_number: 0566013761,
           created_at: s.created_at,
           is_active: s.is_active
         }
@@ -1131,6 +1131,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
