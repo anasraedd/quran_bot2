@@ -291,6 +291,14 @@ const studentMenu = {
     resize_keyboard: true
   }
 };
+const login = {
+  reply_markup: {
+    keyboard: [
+      [{ text: '🔐 دخول' }]
+    ],
+    resize_keyboard: true
+  }
+};
 
 
 const teacherMenu = {
@@ -317,7 +325,7 @@ bot.onText(/\/start/, msg => {
   if (msg.chat.id === OWNER_ID)
     bot.sendMessage(msg.chat.id, 'مرحبًا بك 👨‍🏫', adminMenu);
   else
-    bot.sendMessage(msg.chat.id, 'مرحبًا بك 🌿', studentMenu);
+    bot.sendMessage(msg.chat.id, 'مرحبًا بك 🌿', login);
 });
 
 /* ================= MESSAGE ================= */
@@ -444,119 +452,6 @@ if (!res.data.ok && res.data.message === 'PASSWORD_EXISTS') {
     return bot.sendMessage(chatId, '❌ لم يتم إنشاء الحساب، حاول مرة أخرى');
   }
 
-
-  // عند الضغط على زر إنشاء حساب"
-
-
-  /*
-if (text === 'إنشاء حساب') {
-  userStates[chatId] = { waiting: 'new_user_input' };
-  return bot.sendMessage(chatId, '🔹 أدخل اسم المستخدم أو رقم الهوية:');
-}
-
-// معالجة الإدخال من الادمن
-if (userStates[chatId]?.waiting === 'new_user_input') {
-  const newUsername = text.trim();
-
-  (async () => {
-    try {
-      const res = await axios.post(SCRIPT_URL, {
-        action: "checkUser",
-        username: newUsername
-      });
-
-      if (res.data.exists) {
-        return bot.sendMessage(chatId, '⚠️ هذا المستخدم موجود بالفعل، أدخل اسمًا آخر:');
-      }
-
-      // حفظ الاسم مؤقتًا
-      userStates[chatId].new_user = newUsername;
-      userStates[chatId].waiting = 'choose_role';
-
-      const roleKeyboard = {
-        reply_markup: {
-          
-          inline_keyboard: [
-            [{ text: 'طالب', callback_data: 'role_student' }],
-            [{ text: 'معلم', callback_data: 'role_teacher' }],
-            [{ text: 'ادمن', callback_data: 'role_admin' }]
-          ]
-        }
-      };
-
-      return bot.sendMessage(chatId, '✅ اختر نوع الحساب:', roleKeyboard);
-
-    } catch (err) {
-      console.error(err);
-      return bot.sendMessage(chatId, '❌ حدث خطأ أثناء التحقق من المستخدم، حاول لاحقًا.');
-    }
-  })(); //استدعاء الدالة مباشرة
-}
-
-  // استقبال الاسم الرباعي
-  if (s.waiting === 'full_name') {
-    s.full_name = text.trim();
-    s.waiting = 'phone_number';
-    return bot.sendMessage(chatId, '📱 اكتب رقم الجوال:');
-  }
-
-  // استقبال رقم الجوال
-  if (s.waiting === 'phone_number') {
-    s.phone_number = text.trim();
-    s.waiting = 'password'; // الانتقال لطلب كلمة المرور
-    return bot.sendMessage(chatId, '🔑 ادخل كلمة المرور:');
-  }
-
-  // استقبال كلمة المرور وإنشاء الحساب
-  if (s.waiting === 'password') {
-    s.password = text.trim();
-
-    // جهز الكائن الكامل للإرسال لقوقل شيت
-    const userData = {
-      user_id: chatId,                 // يمكن تعديل إذا تريد رقم معرف آخر
-      username: s.username || '',      // اسم المستخدم الذي اختاره الادمن أو عند تسجيل الدخول
-      password: s.password,
-      role: s.account_type,            // 'admin', 'teacher', 'student'
-      full_name: s.full_name,
-      phone_number: s.phone_number,
-      created_at: new Date().toISOString(),
-      is_active: true
-    };
-
-    try {
-      // استدعاء الدالة التي تتعامل مع Google Sheet
-      const exists = await checkPasswordExists(userData.password); // افحص التكرار
-
-      if (exists) {
-        return bot.sendMessage(chatId, '⚠️ كلمة المرور موجودة مسبقًا، الرجاء إدخال كلمة أخرى:');
-      }
-
-      await saveUserToSheet(userData);
-
-      bot.sendMessage(chatId, `✅ تم إنشاء الحساب بنجاح!\n👤 الاسم: ${userData.full_name}\n📱 رقم الجوال: ${userData.phone_number}\nنوع الحساب: ${userData.role}`);
-
-      delete userStates[chatId]; // مسح حالة المستخدم بعد الانتهاء
-    } catch (error) {
-      console.error(error);
-      return bot.sendMessage(chatId, '❌ حدث خطأ أثناء إنشاء الحساب، حاول مرة أخرى.');
-    }
-  }
-
-
-*/
-
-  /*
-   اختيار نوع الحساب 
-  
-  if (userStates[chatId]?.waiting === 'new_user_id') {
-    const input = text.trim();
-    userStates[chatId].user_id = input;
-
-    userStates[chatId].waiting = 'new_user_type';
-    return bot.sendMessage(chatId, '🔹 اختر نوع الحساب:\n1️⃣ طالب\n2️⃣ معلم\n3️⃣ مشرف/أدمن');
-}
-
-  */
 
   /* ===== إضافة إنجاز ===== */
 
@@ -1131,6 +1026,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
