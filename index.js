@@ -221,19 +221,55 @@ function normalizeSurah(text) {
   ) || null;
 }
 
+// ثابت URL السكربت على Google Sheets
+const SCRIPT_URL = "https://script.google.com/macros/s/....../exec"; // ضع رابط السكربت هنا
+
 const axios = require('axios');
 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzvE0V_70Mmxan-FcoRBL7V8gyAc9P5nIsqECTD9A8xq6cUN_OIHx2r_GbAppd6e7nf/exec";
-
-async function testPing() {
-  const res = await axios.post(SCRIPT_URL, {
-    action: "ping"
-  });
-
-  console.log(res.data);
+// عند الضغط على زر إنشاء حساب"
+if (text === 'إنشاء حساب') {
+  userStates[chatId] = { waiting: 'new_user_input' };
+  return bot.sendMessage(chatId, '🔹 أدخل اسم المستخدم أو رقم الهوية:');
 }
 
-testPing();
+// معالجة الإدخال من الادمن
+if (userStates[chatId]?.waiting === 'new_user_input') {
+  const newUsername = text.trim();
+
+  // استدعاء Google Sheets للتحقق من وجود اسم المستخدم
+  try {
+    const res = await axios.post(SCRIPT_URL, {
+      action: "checkUser",
+      username: newUsername
+    });
+
+    if (res.data.exists) {
+      return bot.sendMessage(chatId, '⚠️ هذا المستخدم موجود بالفعل، أدخل اسمًا آخر:');
+    }
+
+    // إذا لم يكن موجود، نسجل الاسم مؤقتًا في الحالة
+    userStates[chatId].new_user = newUsername;
+    userStates[chatId].waiting = 'choose_role';
+
+    // نطلب اختيار نوع الحساب
+    const roleKeyboard = {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: 'طالب', callback_data: 'role_student' }],
+          [{ text: 'معلم', callback_data: 'role_teacher' }],
+          [{ text: 'ادمن', callback_data: 'role_admin' }]
+        ]
+      }
+    };
+
+    return bot.sendMessage(chatId, '✅ اختر نوع الحساب:', roleKeyboard);
+
+  } catch (err) {
+    console.error(err);
+    return bot.sendMessage(chatId, '❌ حدث خطأ أثناء التحقق من المستخدم، حاول لاحقًا.');
+  }
+}
+
 /*
 
 async function callSheet(action, data = {}) {
@@ -278,6 +314,16 @@ function surahKeyboard() {
   };
 }
 
+const adminMenu = {
+  reply_markup: {
+    keyboard: [
+      [{ text: 'إنشاء حساب' }],
+      [{ text: '🧭 لوحة التحكم' }]
+    ],
+    resize_keyboard: true
+  }
+};
+
 const studentMenu = {
   reply_markup: {
     keyboard: [
@@ -311,7 +357,7 @@ const cancelKeyboard = {
 
 bot.onText(/\/start/, msg => {
   if (msg.chat.id === OWNER_ID)
-    bot.sendMessage(msg.chat.id, 'مرحبًا بك 👨‍🏫', teacherMenu);
+    bot.sendMessage(msg.chat.id, 'مرحبًا بك 👨‍🏫', adminMenu);
   else
     bot.sendMessage(msg.chat.id, 'مرحبًا بك 🌿', studentMenu);
 });
@@ -322,6 +368,23 @@ bot.on('message', async msg => {
   const chatId = msg.chat.id;
   const text = msg.text;
 
+/* إنشاء حساب */
+  
+  if (text === 'إنشاء حساب') {
+    userStates[chatId] = { waiting: 'new_user_id' };
+    return bot.sendMessage(chatId, '🔹 أدخل اسم المستخدم أو رقم الهوية:');
+}
+
+  /* اختيار نوع الحساب */
+  if (userStates[chatId]?.waiting === 'new_user_id') {
+    const input = text.trim();
+    userStates[chatId].user_id = input;
+
+    userStates[chatId].waiting = 'new_user_type';
+    return bot.sendMessage(chatId, '🔹 اختر نوع الحساب:\n1️⃣ طالب\n2️⃣ معلم\n3️⃣ مشرف/أدمن');
+}
+
+  
 
   /* ===== إضافة إنجاز ===== */
 
@@ -873,6 +936,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
