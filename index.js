@@ -223,7 +223,7 @@ function normalizeSurah(text) {
 
 const axios = require('axios');
 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwIgQGjNflpsRwb-wkRyOD_3Q1oWzFnvW2EEQqHJ8LWGf0sVHOV_d41H4NyJsGfGT-n/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzvE0V_70Mmxan-FcoRBL7V8gyAc9P5nIsqECTD9A8xq6cUN_OIHx2r_GbAppd6e7nf/exec";
 
 async function testPing() {
   const res = await axios.post(SCRIPT_URL, {
@@ -873,6 +873,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
