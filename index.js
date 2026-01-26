@@ -422,7 +422,7 @@ if (userStates[chatId]?.waiting === 'new_user_input') {
         user: {
           username: s.username,
           password: s.password,
-          role: s.choose_role,
+          role: s.role,
           full_name: s.full_name,
           phone_number: s.phone_number,
           created_at: s.created_at,
@@ -860,7 +860,7 @@ bot.on('callback_query', q => {
 
   // حفظ نوع الحساب الذي اختاره
   if (['role_admin', 'role_teacher', 'role_student'].includes(data)) {
-//    userStates[chatId].role = data;
+   userStates[chatId].role = data.split("_")[1];
        // userStates[chatId].account_type = data;
 
      
@@ -1131,6 +1131,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
