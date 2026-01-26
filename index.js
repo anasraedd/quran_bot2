@@ -345,38 +345,44 @@ bot.on('message', async msg => {
   // =============================
   // خطوة 2: إدخال اسم المستخدم
   // =============================
-  if (s.waiting === 'new_user_id') {
+if (userStates[chatId]?.waiting === 'new_user_input') {
+  const newUsername = text.trim();
 
-    s.username = text;
-
-    let res;
+  (async () => {
     try {
-      res = await axios.post(SCRIPT_URL, {
-        action: 'checkUsername',
-        username: s.username
+      const res = await axios.post(SCRIPT_URL, {
+        action: "checkUser",
+        username: newUsername
       });
-    } catch (err) {
-      return bot.sendMessage(chatId, '⚠️ خطأ في الاتصال مع قاعدة البيانات');
-    }
 
-    if (res.data?.exists === true) {
-      return bot.sendMessage(chatId, '❌ اسم المستخدم موجود بالفعل، أدخل اسمًا آخر:');
-    }
-
-    s.waiting = 'role';
-
-    return bot.sendMessage(chatId, '🔹 اختر نوع الحساب:', {
-      reply_markup: {
-        keyboard: [
-          ['admin'],
-          ['teacher'],
-          ['student']
-        ],
-        resize_keyboard: true,
-        one_time_keyboard: true
+      if (res.data.exists) {
+        return bot.sendMessage(chatId, '⚠️ هذا المستخدم موجود بالفعل، أدخل اسمًا آخر:');
       }
-    });
-  }
+
+      // حفظ الاسم مؤقتًا
+      userStates[chatId].new_user = newUsername;
+      userStates[chatId].waiting = 'choose_role';
+
+      const roleKeyboard = {
+        reply_markup: {
+          
+          inline_keyboard: [
+            [{ text: 'طالب', callback_data: 'role_student' }],
+            [{ text: 'معلم', callback_data: 'role_teacher' }],
+            [{ text: 'ادمن', callback_data: 'role_admin' }]
+          ]
+        }
+      };
+
+      return bot.sendMessage(chatId, '✅ اختر نوع الحساب:', roleKeyboard);
+
+    } catch (err) {
+      console.error(err);
+      return bot.sendMessage(chatId, '❌ حدث خطأ أثناء التحقق من المستخدم، حاول لاحقًا.');
+    }
+  })(); // استدعاء الدالة مباشرة
+}
+
 
   // =============================
   // خطوة 3: اختيار نوع الحساب
@@ -394,6 +400,7 @@ bot.on('message', async msg => {
 
     return bot.sendMessage(chatId, '🔹 أدخل الاسم الرباعي:');
   }
+  
 
   // =============================
   // خطوة 4: الاسم الرباعي
@@ -1137,6 +1144,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
