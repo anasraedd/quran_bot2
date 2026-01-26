@@ -226,49 +226,6 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxBi16vu5T_AHQP9zxYE
 
 const axios = require('axios');
 
-// عند الضغط على زر إنشاء حساب"
-if (text === 'إنشاء حساب') {
-  userStates[chatId] = { waiting: 'new_user_input' };
-  return bot.sendMessage(chatId, '🔹 أدخل اسم المستخدم أو رقم الهوية:');
-}
-
-// معالجة الإدخال من الادمن
-if (userStates[chatId]?.waiting === 'new_user_input') {
-  const newUsername = text.trim();
-
-  (async () => {
-    try {
-      const res = await axios.post(SCRIPT_URL, {
-        action: "checkUser",
-        username: newUsername
-      });
-
-      if (res.data.exists) {
-        return bot.sendMessage(chatId, '⚠️ هذا المستخدم موجود بالفعل، أدخل اسمًا آخر:');
-      }
-
-      // حفظ الاسم مؤقتًا
-      userStates[chatId].new_user = newUsername;
-      userStates[chatId].waiting = 'choose_role';
-
-      const roleKeyboard = {
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: 'طالب', callback_data: 'role_student' }],
-            [{ text: 'معلم', callback_data: 'role_teacher' }],
-            [{ text: 'ادمن', callback_data: 'role_admin' }]
-          ]
-        }
-      };
-
-      return bot.sendMessage(chatId, '✅ اختر نوع الحساب:', roleKeyboard);
-
-    } catch (err) {
-      console.error(err);
-      return bot.sendMessage(chatId, '❌ حدث خطأ أثناء التحقق من المستخدم، حاول لاحقًا.');
-    }
-  })(); // استدعاء الدالة مباشرة
-}
 
 
 /*
@@ -369,12 +326,50 @@ bot.on('message', async msg => {
   const chatId = msg.chat.id;
   const text = msg.text;
 
-/* إنشاء حساب */
-  
-  if (text === 'إنشاء حساب') {
-    userStates[chatId] = { waiting: 'new_user_id' };
-    return bot.sendMessage(chatId, '🔹 أدخل اسم المستخدم أو رقم الهوية:');
+  // عند الضغط على زر إنشاء حساب"
+if (text === 'إنشاء حساب') {
+  userStates[chatId] = { waiting: 'new_user_input' };
+  return bot.sendMessage(chatId, '🔹 أدخل اسم المستخدم أو رقم الهوية:');
 }
+
+// معالجة الإدخال من الادمن
+if (userStates[chatId]?.waiting === 'new_user_input') {
+  const newUsername = text.trim();
+
+  (async () => {
+    try {
+      const res = await axios.post(SCRIPT_URL, {
+        action: "checkUser",
+        username: newUsername
+      });
+
+      if (res.data.exists) {
+        return bot.sendMessage(chatId, '⚠️ هذا المستخدم موجود بالفعل، أدخل اسمًا آخر:');
+      }
+
+      // حفظ الاسم مؤقتًا
+      userStates[chatId].new_user = newUsername;
+      userStates[chatId].waiting = 'choose_role';
+
+      const roleKeyboard = {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: 'طالب', callback_data: 'role_student' }],
+            [{ text: 'معلم', callback_data: 'role_teacher' }],
+            [{ text: 'ادمن', callback_data: 'role_admin' }]
+          ]
+        }
+      };
+
+      return bot.sendMessage(chatId, '✅ اختر نوع الحساب:', roleKeyboard);
+
+    } catch (err) {
+      console.error(err);
+      return bot.sendMessage(chatId, '❌ حدث خطأ أثناء التحقق من المستخدم، حاول لاحقًا.');
+    }
+  })(); // استدعاء الدالة مباشرة
+}
+
 
   /* اختيار نوع الحساب */
   if (userStates[chatId]?.waiting === 'new_user_id') {
@@ -937,6 +932,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
