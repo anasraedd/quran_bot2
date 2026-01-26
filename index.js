@@ -860,7 +860,10 @@ bot.on('callback_query', q => {
 
   // حفظ نوع الحساب الذي اختاره
   if (['role_admin', 'role_teacher', 'role_student'].includes(data)) {
-    userStates[chatId].account_type = data;
+    userStates[chatId].role = data;
+       // userStates[chatId].account_type = data;
+
+     
     userStates[chatId].waiting = 'full_name'; // الآن ينتظر الاسم الرباعي
 
     // الرد عليه ليكتب الاسم الرباعي
@@ -1128,6 +1131,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
