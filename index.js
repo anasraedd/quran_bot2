@@ -677,6 +677,26 @@ bot.on('callback_query', q => {
   const data = q.data;
 
   bot.answerCallbackQuery(q.id);
+// عند اختيار نوع الحساب من القائمة
+
+  // نتأكد أن هناك حالة حالية للمستخدم
+  if (!userStates[chatId]) userStates[chatId] = {};
+
+  // حفظ نوع الحساب الذي اختاره
+  if (['admin', 'teacher', 'student'].includes(data)) {
+    userStates[chatId].account_type = data;
+    userStates[chatId].waiting = 'full_name'; // الآن ينتظر الاسم الرباعي
+
+    // الرد عليه ليكتب الاسم الرباعي
+    bot.sendMessage(chatId, '✏️ اكتب الاسم الرباعي:');
+
+    // إزالة Inline Keyboard بعد الاختيار
+    bot.editMessageReplyMarkup({ inline_keyboard: [] }, {
+      chat_id: chatId,
+      message_id: callbackQuery.message.message_id
+    });
+  }
+
 
   // 👨‍🏫 المعلم يختار طالب من القائمة
 if (data.startsWith('choose_student_')) {
@@ -932,6 +952,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
