@@ -507,7 +507,9 @@ if (userStates[chatId]?.waiting === 'new_user_input') {
   }
 
 
+*/
 
+  /*
    اختيار نوع الحساب 
   
   if (userStates[chatId]?.waiting === 'new_user_id') {
@@ -1090,6 +1092,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
