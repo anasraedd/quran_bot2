@@ -325,8 +325,94 @@ bot.onText(/\/start/, msg => {
 bot.on('message', async msg => {
   const chatId = msg.chat.id;
   const text = msg.text;
+  
+  // تأكد أن هناك حالة للمستخدم
+  if (!userStates[chatId]) {
+    userStates[chatId] = {};
+  }
+  const s = userStates[chatId]; // الآن s معرف قبل أي استخدام
 
+  // خطوة 1: بدأ إنشاء الحساب
+  if (text === 'إنشاء حساب') {
+    s.waiting = 'new_user_id';
+    return bot.sendMessage(chatId, '🔹 أدخل اسم المستخدم أو رقم الهوية:');
+  }
+
+  // خطوة 2: إدخال اسم المستخدم أو رقم الهوية
+  if (s.waiting === 'new_user_id') {
+    s.username = text;
+
+    // استدعاء Google Sheet للتحقق إذا كان الاسم موجود مسبقًا
+    const res = await axios.post(SCRIPT_URL, {
+      action: 'checkUsername',
+      username: s.username
+    });
+
+    if (res.data.exists) {
+      return bot.sendMessage(chatId, '❌ اسم المستخدم موجود بالفعل. أدخل اسمًا آخر:');
+    }
+
+    // إذا لم يكن موجودًا، ننتقل لاختيار نوع الحساب
+    s.waiting = 'role';
+    return bot.sendMessage(chatId, '🔹 اختر نوع الحساب:', {
+      reply_markup: {
+        keyboard: [['admin', 'teacher', 'student']],
+        one_time_keyboard: true
+      }
+    });
+  }
+
+  // خطوة 3: اختيار نوع الحساب
+  if (s.waiting === 'role') {
+    const data = text.toLowerCase();
+    if (!['admin', 'teacher', 'student'].includes(data)) {
+      return bot.sendMessage(chatId, '❌ اختر خيارًا صحيحًا: admin، teacher، أو student');
+    }
+
+    s.role = data;
+    s.waiting = 'full_name';
+    return bot.sendMessage(chatId, '🔹 أدخل الاسم الرباعي:');
+  }
+
+  // خطوة 4: إدخال الاسم الرباعي
+  if (s.waiting === 'full_name') {
+    s.full_name = text;
+    s.waiting = 'phone_number';
+    return bot.sendMessage(chatId, '🔹 أدخل رقم الجوال:');
+  }
+
+  // خطوة 5: إدخال رقم الجوال
+  if (s.waiting === 'phone_number') {
+    s.phone_number = text;
+    s.waiting = 'password';
+    return bot.sendMessage(chatId, '🔹 أدخل كلمة المرور:');
+  }
+
+  // خطوة 6: إدخال كلمة المرور
+  if (s.waiting === 'password') {
+    s.password = text;
+    s.created_at = new Date().toISOString();
+    s.is_active = true;
+
+    // إرسال البيانات إلى Google Sheet لإنشاء المستخدم
+    const res = await axios.post(SCRIPT_URL, {
+      action: 'addUser',
+      user: s
+    });
+
+    if (res.data.ok) {
+      delete userStates[chatId]; // إعادة تعيين الحالة
+      return bot.sendMessage(chatId, '✅ تم إنشاء الحساب بنجاح!');
+    } else {
+      return bot.sendMessage(chatId, '❌ حدث خطأ أثناء إنشاء الحساب، حاول مرة أخرى.');
+    }
+  }
+
+  
   // عند الضغط على زر إنشاء حساب"
+
+
+  /*
 if (text === 'إنشاء حساب') {
   userStates[chatId] = { waiting: 'new_user_input' };
   return bot.sendMessage(chatId, '🔹 أدخل اسم المستخدم أو رقم الهوية:');
@@ -423,6 +509,7 @@ if (userStates[chatId]?.waiting === 'new_user_input') {
 
 
   /* اختيار نوع الحساب */
+  /*
   if (userStates[chatId]?.waiting === 'new_user_id') {
     const input = text.trim();
     userStates[chatId].user_id = input;
@@ -431,7 +518,7 @@ if (userStates[chatId]?.waiting === 'new_user_input') {
     return bot.sendMessage(chatId, '🔹 اختر نوع الحساب:\n1️⃣ طالب\n2️⃣ معلم\n3️⃣ مشرف/أدمن');
 }
 
-  
+  */
 
   /* ===== إضافة إنجاز ===== */
 
@@ -1003,6 +1090,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
