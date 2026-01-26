@@ -361,7 +361,7 @@ if (userStates[chatId]?.waiting === 'new_user_input') {
       // حفظ الاسم مؤقتًا
       userStates[chatId].new_user = newUsername;
       userStates[chatId].waiting = 'choose_role';
-         s.full_name = text.trim();
+         s.username = text.trim();
 
       const roleKeyboard = {
         reply_markup: {
@@ -1131,6 +1131,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
