@@ -345,6 +345,7 @@ if (text === 'إنشاء حساب') {
 // معالجة الإدخال من الادمن
 if (userStates[chatId]?.waiting === 'new_user_input') {
   const newUsername = text.trim();
+ 
 
   (async () => {
     try {
@@ -360,6 +361,7 @@ if (userStates[chatId]?.waiting === 'new_user_input') {
       // حفظ الاسم مؤقتًا
       userStates[chatId].new_user = newUsername;
       userStates[chatId].waiting = 'choose_role';
+         s.full_name = text.trim();
 
       const roleKeyboard = {
         reply_markup: {
@@ -1126,6 +1128,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
