@@ -399,7 +399,7 @@ if (userStates[chatId]?.waiting === 'new_user_input') {
   // =============================
   if (s.waiting === 'phone_number') {
 
-    s.phone_number = text;
+    s.phone_number = 'kjkk';
     s.waiting = 'password';
 
     return bot.sendMessage(chatId, '🔹 أدخل كلمة المرور:');
@@ -1131,6 +1131,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
