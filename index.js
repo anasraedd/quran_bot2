@@ -365,7 +365,7 @@ bot.on('message', async msg => {
     });
 
     if (!res.data.exists) {
-      return bot.sendMessage(chatId, '❌ المستخدم غير موجود، حاول مرة أخرى:');
+      return bot.sendMessage(chatId, res.data.exists);
     }
 
     s.waiting = 'login_password';
@@ -495,7 +495,7 @@ if (userStates[chatId]?.waiting === 'new_user_input') {
 
     s.password = text;
     s.created_at = new Date().toISOString();
-    s.is_active = true;
+    s.is_active = false;
 
     let res;
 
@@ -1101,6 +1101,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
