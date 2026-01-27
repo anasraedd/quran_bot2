@@ -385,7 +385,7 @@ return bot.sendMessage(chatId, '❌ المستخدم غير موجود، حاو�
     });
 
     if (!res.data.ok) {
-      return bot.sendMessage(chatId, '❌ كلمة المرور غير صحيحة، حاول مرة أخرى:'+ JSON.stringify(res.data)
+      return bot.sendMessage(chatId, '❌ كلمة المرور غير صحيحة، حاول مرة أخرى:'
 );
     }
 
@@ -406,7 +406,7 @@ return bot.sendMessage(chatId, '❌ المستخدم غير موجود، حاو�
       keyboard = adminMenu;
     }
 
-     delete s.waiting; 
+  //   delete s.waiting; 
 
     return bot.sendMessage(
       chatId,
@@ -1103,6 +1103,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
