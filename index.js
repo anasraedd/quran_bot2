@@ -394,8 +394,8 @@ return bot.sendMessage(chatId, '❌ المستخدم غير موجود، حاو�
     const role = res.data.role;
 console.log('LOGIN OK:', res.data);
 
- //   delete userStates[chatId];
-/*
+    delete userStates[chatId];
+
     // أزرار حسب الدور
     let keyboard = [];
 
@@ -406,19 +406,14 @@ console.log('LOGIN OK:', res.data);
     } else if (role === 'admin') {
       keyboard = adminMenu;
     }
-    */
+    
 
   //   delete s.waiting; 
 
     return bot.sendMessage(
       chatId,
       `🌸 مرحباً ${fullName}`,
-      {
-        reply_markup: {
-          adminMenu,
-          resize_keyboard: true
-        }
-      }
+ keyboard
     );
   }
   // =============================
@@ -1105,6 +1100,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
