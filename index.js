@@ -394,7 +394,7 @@ return bot.sendMessage(chatId, '❌ المستخدم غير موجود، حاو�
     const role = res.data.role;
 console.log('LOGIN OK:', res.data);
 
-    delete userStates[chatId];
+ //   delete userStates[chatId];
 /*
     // أزرار حسب الدور
     let keyboard = [];
@@ -1105,6 +1105,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
