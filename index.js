@@ -365,7 +365,7 @@ bot.on('message', async msg => {
     });
 
     if (!res.data.exists) {
-return bot.sendMessage(chatId, JSON.stringify(res.data));
+return bot.sendMessage(chatId, '❌ المستخدم غير موجود، حاول مرة أخرى:');
 
     }
 
@@ -385,7 +385,8 @@ return bot.sendMessage(chatId, JSON.stringify(res.data));
     });
 
     if (!res.data.ok) {
-      return bot.sendMessage(chatId, '❌ كلمة المرور غير صحيحة، حاول مرة أخرى:');
+      return bot.sendMessage(chatId, '❌ كلمة المرور غير صحيحة، حاول مرة أخرى:'+ JSON.stringify(res.data)
+);
     }
 
     // نجاح تسجيل الدخول
@@ -1102,6 +1103,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
