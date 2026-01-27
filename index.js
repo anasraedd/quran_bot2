@@ -365,7 +365,8 @@ bot.on('message', async msg => {
     });
 
     if (!res.data.exists) {
-return bot.sendMessage(chatId, String(res.data.exists));
+return bot.sendMessage(chatId, JSON.stringify(res.data));
+
     }
 
     s.waiting = 'login_password';
@@ -1101,6 +1102,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
