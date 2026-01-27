@@ -415,7 +415,7 @@ console.log('LOGIN OK:', res.data);
       `🌸 مرحباً ${fullName}`,
       {
         reply_markup: {
-          keyboard,
+          adminMenu,
           resize_keyboard: true
         }
       }
@@ -1105,6 +1105,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
