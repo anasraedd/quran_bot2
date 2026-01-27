@@ -356,7 +356,7 @@ bot.on('message', async msg => {
 
    // إدخال اسم المستخدم
   // =========================
-  if (  s.waiting = 'login_username') {
+  if ( s.waiting === 'login_username') {
     s.username = text;
 
     const res = await axios.post(SCRIPT_URL, {
@@ -404,6 +404,8 @@ bot.on('message', async msg => {
     } else if (role === 'admin') {
       keyboard = adminMenu;
     }
+
+     delete s.waiting; 
 
     return bot.sendMessage(
       chatId,
@@ -1100,6 +1102,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
