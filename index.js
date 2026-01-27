@@ -392,9 +392,10 @@ return bot.sendMessage(chatId, '❌ المستخدم غير موجود، حاو�
     // نجاح تسجيل الدخول
     const fullName = res.data.full_name;
     const role = res.data.role;
+console.log('LOGIN OK:', res.data);
 
     delete userStates[chatId];
-
+/*
     // أزرار حسب الدور
     let keyboard = [];
 
@@ -405,6 +406,7 @@ return bot.sendMessage(chatId, '❌ المستخدم غير موجود، حاو�
     } else if (role === 'admin') {
       keyboard = adminMenu;
     }
+    */
 
   //   delete s.waiting; 
 
@@ -1103,6 +1105,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
