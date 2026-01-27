@@ -368,14 +368,14 @@ bot.on('message', async msg => {
       return bot.sendMessage(chatId, '❌ المستخدم غير موجود، حاول مرة أخرى:');
     }
 
-    s.step = 'login_password';
+    s.waiting = 'login_password';
     return bot.sendMessage(chatId, '🔹 أدخل كلمة المرور:');
   }
 
   // =========================
   // إدخال كلمة المرور
   // =========================
-  if (s.step === 'login_password') {
+  if (s.waiting === 'login_password') {
     const res = await axios.post(SCRIPT_URL, {
       action: 'checkPassword',
       username: s.username,
@@ -1101,6 +1101,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
