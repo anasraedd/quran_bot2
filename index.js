@@ -546,12 +546,13 @@ if (text === '🚪 تسجيل خروج') {
       return bot.sendMessage(
         chatId,
         '✅ تم تسجيل الخروج بنجاح',
-        {
-          reply_markup: {
-            keyboard: [['🔐 دخول']],
-            resize_keyboard: true
-          }
+           reply_markup: {
+          
+          inline_keyboard: [
+           [['🔐 دخول']],
+          ]
         }
+      
       );
     } else {
       return bot.sendMessage(chatId, '❌ لم يتم العثور على جلسة نشطة');
@@ -1137,6 +1138,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
