@@ -387,10 +387,12 @@ bot.on('message', async msg => {
     return bot.sendMessage(chatId, '❌ حدث خطأ، حاول لاحقًا.');
   }
 
+  /*
     if (text === '🔐 دخول') {
     s.waiting = 'login_username'
     return bot.sendMessage(chatId, '🔹 أدخل اسم المستخدم أو رقم الهوية:');
   }
+  */
 
    // إدخال اسم المستخدم
   // =========================
@@ -1176,6 +1178,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
