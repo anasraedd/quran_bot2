@@ -348,53 +348,16 @@ bot.on('message', async msg => {
   }
 
   const s = userStates[chatId];
-  
-  // 🔹 تجاهل الرسائل بدون نص
-  if (!text) return;
+// 🔹 تجاهل الرسائل بدون نص
+if (!text) return;
 
-  try {
-    // 1️⃣ تحقق من وجود المستخدم في جدول user_telegram_ids
-    const sessionCheck = await axios.post(SCRIPT_URL, {
-      action: 'checkTelegramSession',
-      telegram_id: chatId
-    });
+try {
+  const s = userStates[chatId] || {};
 
-    const isLoggedIn = sessionCheck.data.exists; // true أو false
+  // 1️⃣ إذا المستخدم في مرحلة تسجيل الدخول، نتخطى التحقق من الجلسة
+  if (!s.waiting || s.waiting === 'login_username' || s.waiting === 'login_password') {
 
-    // 2️⃣ فلترة جميع الرسائل للمستخدمين غير مسجلين
-    if (!isLoggedIn) {
-      // إذا ضغط الزر "🔐 دخول" نبدأ عملية تسجيل الدخول
-      if (text === '🔐 دخول') {
-        if (!userStates[chatId]) userStates[chatId] = {};
-        const s = userStates[chatId];
-        s.waiting = 'login_username';
-
-        return bot.sendMessage(chatId, '🔹 أدخل اسم المستخدم أو رقم الهوية:');
-      }
-
-      // أي رسالة أخرى من غير مسجل
-      return bot.sendMessage(chatId, '🔐 يجب تسجيل الدخول أولًا');
-    }
-
-    // 3️⃣ إذا المستخدم مسجل دخول، يمكن التعامل مع باقي الرسائل هنا
-    // مثال: أزرار حسب الدور، أو تنفيذ أوامر البوت
-    const sessionData = sessionCheck.data; // يمكنك أخذ role أو full_name إذا أردت
-    // تابع باقي منطق البوت هنا حسب الدور
-    // ...
-
-  } catch (err) {
-    console.error('خطأ في معالجة الرسالة:', err.message);
-    return bot.sendMessage(chatId, '❌ حدث خطأ، حاول لاحقًا.');
-  }
-
-  /*
-    if (text === '🔐 دخول') {
-    s.waiting = 'login_username'
-    return bot.sendMessage(chatId, '🔹 أدخل اسم المستخدم أو رقم الهوية:');
-  }
-  */
-
-   // إدخال اسم المستخدم
+       // إدخال اسم المستخدم
   // =========================
   if ( s.waiting === 'login_username') {
     s.username = text;
@@ -413,7 +376,7 @@ return bot.sendMessage(chatId, '❌ المستخدم غير موجود، حاو�
     return bot.sendMessage(chatId, '🔹 أدخل كلمة المرور:');
   }
 
-  // =========================
+    // =========================
   // إدخال كلمة المرور
   // =========================
   if (s.waiting === 'login_password') {
@@ -456,6 +419,46 @@ console.log('LOGIN OK:', res.data);
  keyboard
     );
   }
+
+    // إذا نقر الزر "🔐 دخول" ولم يبدأ s.waiting بعد
+    if (text === '🔐 دخول') {
+      if (!userStates[chatId]) userStates[chatId] = {};
+      userStates[chatId].waiting = 'login_username';
+      return bot.sendMessage(chatId, '🔹 أدخل اسم المستخدم أو رقم الهوية:');
+    }
+  }
+
+  // 2️⃣ التحقق من الجلسة للمستخدمين المسجلين فقط
+  const sessionCheck = await axios.post(SCRIPT_URL, {
+    action: 'checkTelegramSession',
+    telegram_id: chatId
+  });
+
+  if (!sessionCheck.data.exists) {
+    return bot.sendMessage(chatId, '🔐 يجب تسجيل الدخول أولًا');
+  }
+
+  // 3️⃣ باقي منطق البوت للمستخدمين المسجلين
+  const sessionData = sessionCheck.data;
+  // هنا يمكن التعامل مع أي رسائل أخرى
+  // ...
+
+} catch (err) {
+  console.error('خطأ في معالجة الرسالة:', err.message);
+  return bot.sendMessage(chatId, '❌ حدث خطأ، حاول لاحقًا.');
+}
+
+
+  /*
+    if (text === '🔐 دخول') {
+    s.waiting = 'login_username'
+    return bot.sendMessage(chatId, '🔹 أدخل اسم المستخدم أو رقم الهوية:');
+  }
+  */
+
+
+
+
   // =============================
   // خطوة 1: بدء إنشاء الحساب
   // =============================
@@ -1178,6 +1181,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
