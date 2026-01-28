@@ -526,6 +526,43 @@ if (!res.data.ok && res.data.message === 'PASSWORD_EXISTS') {
     return bot.sendMessage(chatId, '❌ لم يتم إنشاء الحساب، حاول مرة أخرى');
   }
 
+  // =========================
+// تسجيل الخروج
+// =========================
+if (text === '🚪 تسجيل خروج') {
+
+  try {
+    const res = await axios.post(SCRIPT_URL, {
+      action: 'logout',
+      telegram_id: chatId
+    });
+
+    if (res.data.ok) {
+
+      // حذف أي حالة مؤقتة
+      delete userStates[chatId];
+
+      // زر الدخول فقط
+      return bot.sendMessage(
+        chatId,
+        '✅ تم تسجيل الخروج بنجاح',
+        {
+          reply_markup: {
+            keyboard: [['🔐 دخول']],
+            resize_keyboard: true
+          }
+        }
+      );
+    } else {
+      return bot.sendMessage(chatId, '❌ لم يتم العثور على جلسة نشطة');
+    }
+
+  } catch (err) {
+    console.error(err);
+    return bot.sendMessage(chatId, '⚠️ حدث خطأ أثناء تسجيل الخروج');
+  }
+}
+
 
   /* ===== إضافة إنجاز ===== */
 
@@ -1100,6 +1137,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
