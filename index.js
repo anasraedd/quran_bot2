@@ -543,17 +543,17 @@ if (text === '🚪 تسجيل خروج') {
       delete userStates[chatId];
 
       // زر الدخول فقط
-      return bot.sendMessage(
-        chatId,
-        '✅ تم تسجيل الخروج بنجاح',
-           reply_markup: {
-          
-          inline_keyboard: [
-           [['🔐 دخول']],
-          ]
-        }
-      
-      );
+  return bot.sendMessage(
+  chatId,
+  '✅ تم تسجيل الخروج بنجاح',
+  {
+    reply_markup: {
+      keyboard: [['🔐 دخول']],
+      resize_keyboard: true
+    }
+  }
+);
+
     } else {
       return bot.sendMessage(chatId, '❌ لم يتم العثور على جلسة نشطة');
     }
@@ -1138,6 +1138,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
