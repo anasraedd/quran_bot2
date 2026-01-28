@@ -348,6 +348,44 @@ bot.on('message', async msg => {
   }
 
   const s = userStates[chatId];
+  
+  // 🔹 تجاهل الرسائل بدون نص
+  if (!text) return;
+
+  try {
+    // 1️⃣ تحقق من وجود المستخدم في جدول user_telegram_ids
+    const sessionCheck = await axios.post(SCRIPT_URL, {
+      action: 'checkTelegramSession',
+      telegram_id: chatId
+    });
+
+    const isLoggedIn = sessionCheck.data.exists; // true أو false
+
+    // 2️⃣ فلترة جميع الرسائل للمستخدمين غير مسجلين
+    if (!isLoggedIn) {
+      // إذا ضغط الزر "🔐 دخول" نبدأ عملية تسجيل الدخول
+      if (text === '🔐 دخول') {
+        if (!userStates[chatId]) userStates[chatId] = {};
+        const s = userStates[chatId];
+        s.waiting = 'login_username';
+
+        return bot.sendMessage(chatId, '🔹 أدخل اسم المستخدم أو رقم الهوية:');
+      }
+
+      // أي رسالة أخرى من غير مسجل
+      return bot.sendMessage(chatId, '🔐 يجب تسجيل الدخول أولًا');
+    }
+
+    // 3️⃣ إذا المستخدم مسجل دخول، يمكن التعامل مع باقي الرسائل هنا
+    // مثال: أزرار حسب الدور، أو تنفيذ أوامر البوت
+    const sessionData = sessionCheck.data; // يمكنك أخذ role أو full_name إذا أردت
+    // تابع باقي منطق البوت هنا حسب الدور
+    // ...
+
+  } catch (err) {
+    console.error('خطأ في معالجة الرسالة:', err.message);
+    return bot.sendMessage(chatId, '❌ حدث خطأ، حاول لاحقًا.');
+  }
 
     if (text === '🔐 دخول') {
     s.waiting = 'login_username'
@@ -1138,6 +1176,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
