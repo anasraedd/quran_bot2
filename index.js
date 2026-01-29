@@ -225,7 +225,7 @@ function normalizeSurah(text) {
 }
 
 // ثابت URL السكربت على Google Sheets
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzwvpaJUx6YQvj9kbKrlK5Rife_E8OV6pgoNOzmcaA2iuxSDFWQhzDlVT8-4BSG-U2V/exec"; // ضع رابط السكربت هنا
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxbJ7AE1TDQTsFZ3-MBFx3fKELUqnHE9_ZrO6OF_FPMfDyoDBdA_FkwSFkL-YR4dBAj/exec"; // ضع رابط السكربت هنا
 
 const axios = require('axios');
 
@@ -1181,6 +1181,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
