@@ -366,7 +366,7 @@ if (text === '🔐 دخول إلى حساب آخر') {
     // 2️⃣ إنشاء لوحة الأزرار
 const keyboard = accounts.map(acc => ([
   {
-    text: acc.full_name+acc.user_id,
+    text: acc.full_name,
     callback_data: `switch:${acc.user_id}`
   }
 ]));
@@ -1259,6 +1259,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
