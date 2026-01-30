@@ -351,51 +351,48 @@ bot.on('message', async msg => {
   }
 
   const s = userStates[chatId];
-  // عند الضغط على زر "🔐 دخول إلى حساب"
 if (text === '🔐 دخول إلى حساب آخر') {
 
   try {
-    // 1️⃣ جلب جميع الحسابات غير النشطة المرتبطة بالتيليجرام
     const res = await axios.post(SCRIPT_URL, {
       action: 'getInactiveAccounts',
       telegram_id: chatId
     });
 
-//    const accounts = res.data.accounts || [];
-      const accounts = [];
+    const accounts = res.data.accounts || [];
 
-    // 2️⃣ إنشاء لوحة الأزرار
-const keyboard = accounts.map(acc => ([
-  {
-    text: acc.full_name,
-    callback_data: `switch:${acc.user_id}`
-  }
-]));
+    // 🔹 إنشاء أزرار الحسابات
+    const keyboard = accounts.map(acc => ([
+      {
+        text: acc.full_name,
+        callback_data: `switch:${acc.user_id}`
+      }
+    ]));
 
-    // إضافة زر لتسجيل حساب جديد
+    // 🔹 زر الدخول بحساب جديد
+    keyboard.push([
+      {
+        text: '🔄 الدخول في حساب آخر',
+        callback_data: 'login_new'
+      }
+    ]);
 
+    // 🔹 حفظ الحالة
+    userStates[chatId] = {
+      waiting: 'switch_account',
+      accounts
+    };
 
-    // 3️⃣ حفظ الحالة مع قائمة الحسابات
-    userStates[chatId] = { waiting: 'switch_account', accounts };
-
-   return bot.sendMessage(chatId, '🔹 اختر الحساب الذي تريد الدخول فيه:', {
-  reply_markup: {
-    inline_keyboard: keyboard
-  }
-});
-
-// keyboard.push([
-//   {
-//     text: '🔄 الدخول في حساب آخر',
-//     callback_data: 'login_new'
-//   }
-// ]);
+    return bot.sendMessage(chatId, '🔹 اختر الحساب الذي تريد الدخول فيه:', {
+      reply_markup: {
+        inline_keyboard: keyboard
+      }
+    });
 
   } catch (err) {
     console.error('خطأ في جلب الحسابات غير النشطة:', err.message);
     return bot.sendMessage(chatId, '❌ حدث خطأ، حاول لاحقًا.');
   }
-
 }
 
 
@@ -1260,6 +1257,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
