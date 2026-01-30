@@ -280,6 +280,7 @@ const adminMenu = {
     keyboard: [
       [{ text: 'إنشاء حساب' }],
       [{ text: '🧭 لوحة التحكم' }],
+  [{ text: '🔐 دخول إلى حساب آخر' }],      
        ['🚪 تسجيل خروج']
     ],
     resize_keyboard: true
@@ -291,6 +292,7 @@ const studentMenu = {
     keyboard: [
       [{ text: '➕ إضافة إنجاز' }],
       [{ text: '📘 آخر إنجاز' }],
+       [{ text: '🔐 دخول إلى حساب آخر' }],   
        ['🚪 تسجيل خروج']
     ],
     resize_keyboard: true
@@ -313,6 +315,7 @@ const teacherMenu = {
       [{ text: '➕ إضافة إنجاز لطالب' }],
       [{ text: '🧭 لوحة التحكم' }],
       [{ text: '📊 الإنجازات غير المقيمة' }],
+       [{ text: '🔐 دخول إلى حساب آخر' }],   
        ['🚪 تسجيل خروج']
     ],
     resize_keyboard: true
@@ -348,6 +351,54 @@ bot.on('message', async msg => {
   }
 
   const s = userStates[chatId];
+  // عند الضغط على زر "🔐 دخول إلى حساب"
+if (text === '🔐 دخول إلى حساب آخر') {
+
+  try {
+    // 1️⃣ جلب جميع الحسابات غير النشطة المرتبطة بالتيليجرام
+    const res = await axios.post(SCRIPT_URL, {
+      action: 'getInactiveAccounts',
+      telegram_id: chatId
+    });
+
+    const accounts = res.data.accounts || [];
+
+    // 2️⃣ إنشاء لوحة الأزرار
+const keyboard = accounts.map(acc => ([
+  {
+    text: acc.full_name+acc.user_id,
+    callback_data: `switch:${acc.user_id}`
+  }
+]));
+
+    // إضافة زر لتسجيل حساب جديد
+   keyboard.push([
+  {
+    text: '🔄 الدخول في حساب آخر',
+    callback_data: 'login_new'
+  }
+]);
+
+
+    // 3️⃣ حفظ الحالة مع قائمة الحسابات
+    userStates[chatId] = { waiting: 'switch_account', accounts };
+
+    return bot.sendMessage(chatId, '🔹 اختر الحساب الذي تريد الدخول فيه:', {
+      reply_markup: {
+        keyboard,
+        resize_keyboard: true,
+        one_time_keyboard: true
+      }
+    });
+
+  } catch (err) {
+    console.error('خطأ في جلب الحسابات غير النشطة:', err.message);
+    return bot.sendMessage(chatId, '❌ حدث خطأ، حاول لاحقًا.');
+  }
+}
+
+
+
 // 🔹 تجاهل الرسائل بدون نص
 if (!text) return;
 
@@ -926,6 +977,33 @@ bot.on('callback_query', q => {
     });
   }
 
+  if (s.waiting === 'switch_account') {
+  if (text === '🔄 الدخول في حساب آخر') {
+    // نبدأ عملية تسجيل الدخول اليدوي
+    s.waiting = 'login_username';
+    return bot.sendMessage(chatId, '🔹 أدخل اسم المستخدم أو رقم الهوية:');
+  }
+
+  // اختيار حساب من القائمة
+  const selected = s.accounts.find(a => a.full_name === text);
+
+  if (!selected) {
+    return bot.sendMessage(chatId, '❌ الرجاء اختيار حساب صحيح من القائمة.');
+  }
+
+  // تفعيل الحساب المختار
+  await axios.post(SCRIPT_URL, {
+    action: 'activateAccount',
+    user_id: selected.user_id,
+    telegram_id: chatId
+  });
+
+  delete userStates[chatId];
+
+  return bot.sendMessage(chatId, `✅ تم تفعيل الحساب: ${selected.full_name}`);
+}
+
+
 
   // 👨‍🏫 المعلم يختار طالب من القائمة
 if (data.startsWith('choose_student_')) {
@@ -1181,6 +1259,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
