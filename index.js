@@ -974,6 +974,81 @@ bot.on('callback_query', q => {
       message_id: callbackQuery.message.message_id
     });
   }
+
+  bot.on('callback_query', async query => {
+
+  const chatId = query.message.chat.id;
+  const data = query.data;
+
+  try {
+
+    // =========================
+    // 🔁 دخول مباشر لحساب سابق
+    // =========================
+    if (data.startsWith('switch:')) {
+
+      const user_id = data.split(':')[1];
+
+      const res = await axios.post(SCRIPT_URL, {
+        action: 'switchAccount',
+        telegram_id: chatId,
+        user_id
+      });
+
+      if (!res.data.ok) {
+        return bot.sendMessage(chatId, '❌ فشل الدخول للحساب');
+      }
+
+      const { full_name, role } = res.data;
+
+      // حذف أي حالة قديمة
+      delete userStates[chatId];
+
+      let keyboard = [];
+
+      if (role === 'student') keyboard = studentMenu;
+      if (role === 'teacher') keyboard = teacherMenu;
+      if (role === 'admin') keyboard = adminMenu;
+
+      return bot.sendMessage(
+        chatId,
+        `🌸 مرحباً ${full_name}`,
+        {
+          reply_markup: {
+            keyboard,
+            resize_keyboard: true
+          }
+        }
+      );
+    }
+
+    // =========================
+    // 🔐 دخول في حساب آخر يدويًا
+    // =========================
+    if (data === 'login_new') {
+
+      userStates[chatId] = {
+        waiting: 'login_username'
+      };
+
+      return bot.sendMessage(
+        chatId,
+        '🔹 أدخل اسم المستخدم أو رقم الهوية:',
+        {
+          reply_markup: {
+            keyboard: [['🔐 دخول']],
+            resize_keyboard: true
+          }
+        }
+      );
+    }
+
+  } catch (err) {
+    console.error('callback error:', err.message);
+    return bot.sendMessage(chatId, '❌ حدث خطأ، حاول لاحقًا');
+  }
+});
+
 /*
   if (s.waiting === 'switch_account') {
   if (text === '🔄 الدخول في حساب آخر') {
@@ -1257,6 +1332,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
