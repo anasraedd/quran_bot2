@@ -384,12 +384,12 @@ const keyboard = accounts.map(acc => ([
   }
 });
 
-keyboard.push([
-  {
-    text: '🔄 الدخول في حساب آخر',
-    callback_data: 'login_new'
-  }
-]);
+// keyboard.push([
+//   {
+//     text: '🔄 الدخول في حساب آخر',
+//     callback_data: 'login_new'
+//   }
+// ]);
 
   } catch (err) {
     console.error('خطأ في جلب الحسابات غير النشطة:', err.message);
@@ -1260,6 +1260,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
