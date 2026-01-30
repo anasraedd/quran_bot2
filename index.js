@@ -470,7 +470,7 @@ console.log('LOGIN OK:', res.data);
   }
 
     // إذا نقر الزر "🔐 دخول" ولم يبدأ s.waiting بعد
-    if (text === '🔐 دخول' || text === '🔐 دخول إلى حساب آخر') {
+    if (text === '🔐 دخول' || text === '🔄 الدخول في حساب آخر') {
       if (!userStates[chatId]) userStates[chatId] = {};
       userStates[chatId].waiting = 'login_username';
       return bot.sendMessage(chatId, '🔹 أدخل اسم المستخدم أو رقم الهوية:');
@@ -1019,12 +1019,7 @@ bot.on('callback_query', q => {
     return bot.sendMessage(
       chatId,
       `🌸 مرحبًا ${fullName}`,
-      {
-        reply_markup: {
-          keyboard,
-          resize_keyboard: true
-        }
-      }
+      keyboard
     );
   }
 
@@ -1354,6 +1349,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
