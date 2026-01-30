@@ -379,13 +379,12 @@ const keyboard = accounts.map(acc => ([
     // 3️⃣ حفظ الحالة مع قائمة الحسابات
     userStates[chatId] = { waiting: 'switch_account', accounts };
 
-    return bot.sendMessage(chatId, '🔹 اختر الحساب الذي تريد الدخول فيه:', {
-      reply_markup: {
-        keyboard,
-      //  resize_keyboard: true,
-        //one_time_keyboard: true
-      }
-    });
+   return bot.sendMessage(chatId, '🔹 اختر الحساب الذي تريد الدخول فيه:', {
+  reply_markup: {
+    inline_keyboard: keyboard
+  }
+});
+
 
   } catch (err) {
     console.error('خطأ في جلب الحسابات غير النشطة:', err.message);
@@ -1260,6 +1259,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
