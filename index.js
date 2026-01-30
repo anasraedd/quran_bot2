@@ -225,7 +225,7 @@ function normalizeSurah(text) {
 }
 
 // ثابت URL السكربت على Google Sheets
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxbJ7AE1TDQTsFZ3-MBFx3fKELUqnHE9_ZrO6OF_FPMfDyoDBdA_FkwSFkL-YR4dBAj/exec"; // ضع رابط السكربت هنا
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzGkiXX957TT5fKagaH2iCsXlPLNfeoegAGpWgDUPXOjP_ys4LGAV5T6v51HEJv6Uhn/exec"; // ضع رابط السكربت هنا
 
 const axios = require('axios');
 
@@ -359,7 +359,7 @@ if (text === '🔐 دخول إلى حساب آخر') {
       telegram_id: chatId
     });
 
-    const accounts = res.data.accounts;
+    const accounts = res.data.accounts || [];
 
     // 🔹 إنشاء أزرار الحسابات
     const keyboard = accounts.map(acc => ([
@@ -1257,6 +1257,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
