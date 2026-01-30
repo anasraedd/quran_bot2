@@ -976,7 +976,7 @@ bot.on('callback_query', q => {
       message_id: callbackQuery.message.message_id
     });
   }
-
+/*
   if (s.waiting === 'switch_account') {
   if (text === '🔄 الدخول في حساب آخر') {
     // نبدأ عملية تسجيل الدخول اليدوي
@@ -1002,7 +1002,7 @@ bot.on('callback_query', q => {
 
   return bot.sendMessage(chatId, `✅ تم تفعيل الحساب: ${selected.full_name}`);
 }
-
+*/
 
 
   // 👨‍🏫 المعلم يختار طالب من القائمة
@@ -1259,6 +1259,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
