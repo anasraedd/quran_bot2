@@ -385,16 +385,18 @@ const keyboard = accounts.map(acc => ([
   }
 });
 
+keyboard.push([
+  {
+    text: '🔄 الدخول في حساب آخر',
+    callback_data: 'login_new'
+  }
+]);
 
   } catch (err) {
     console.error('خطأ في جلب الحسابات غير النشطة:', err.message);
     return bot.sendMessage(chatId, '❌ حدث خطأ، حاول لاحقًا.');
   }
-   keyboard.push([
-  {
-    text: '🔄 الدخول في حساب آخر',
-    callback_data: 'login_new'
-  }
+
 }
 
 
@@ -1259,6 +1261,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
