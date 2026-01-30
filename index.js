@@ -470,7 +470,7 @@ console.log('LOGIN OK:', res.data);
   }
 
     // إذا نقر الزر "🔐 دخول" ولم يبدأ s.waiting بعد
-    if (text === '🔐 دخول') {
+    if (text === '🔐 دخول' || text === '🔐 دخول إلى حساب آخر') {
       if (!userStates[chatId]) userStates[chatId] = {};
       userStates[chatId].waiting = 'login_username';
       return bot.sendMessage(chatId, '🔹 أدخل اسم المستخدم أو رقم الهوية:');
@@ -982,45 +982,52 @@ bot.on('callback_query', q => {
 
   try {
 
-    // =========================
-    // 🔁 دخول مباشر لحساب سابق
-    // =========================
-    if (data.startsWith('switch:')) {
 
-      const user_id = data.split(':')[1];
+  // =====================
+  // ❌ إلغاء
+  // =====================
 
-      const res = await axios.post(SCRIPT_URL, {
-        action: 'switchAccount',
-        telegram_id: chatId,
-        user_id
-      });
 
-      if (!res.data.ok) {
-        return bot.sendMessage(chatId, '❌ فشل الدخول للحساب');
-      }
+  // =====================
+  // 🔁 تبديل حساب
+  // =====================
+  if (data.startsWith('switch:')) {
 
-      const { full_name, role } = res.data;
+    const userId = data.split(':')[1];
 
-      // حذف أي حالة قديمة
-      delete userStates[chatId];
+    const res = await axios.post(SCRIPT_URL, {
+      action: 'switchAccount',
+      telegram_id: chatId,
+      user_id: userId
+    });
 
-      let keyboard = [];
-
-      if (role === 'student') keyboard = studentMenu;
-      if (role === 'teacher') keyboard = teacherMenu;
-      if (role === 'admin') keyboard = adminMenu;
-
-      return bot.sendMessage(
-        chatId,
-        `🌸 مرحباً ${full_name}`,
-        {
-          reply_markup: {
-            keyboard,
-            resize_keyboard: true
-          }
-        }
-      );
+    if (!res.data.ok) {
+      return bot.sendMessage(chatId, '❌ فشل الدخول للحساب');
     }
+
+    const role = res.data.role;
+    const fullName = res.data.full_name;
+
+    let keyboard = [];
+
+    if (role === 'student') keyboard = studentMenu;
+    if (role === 'teacher') keyboard = teacherMenu;
+    if (role === 'admin') keyboard = adminMenu;
+
+    delete userStates[chatId];
+
+    return bot.sendMessage(
+      chatId,
+      `🌸 مرحبًا ${fullName}`,
+      {
+        reply_markup: {
+          keyboard,
+          resize_keyboard: true
+        }
+      }
+    );
+  }
+
 
     // =========================
     // 🔐 دخول في حساب آخر يدويًا
@@ -1030,17 +1037,32 @@ bot.on('callback_query', q => {
       userStates[chatId] = {
         waiting: 'login_username'
       };
+  const role = res.data.role;
+console.log('LOGIN OK:', res.data);
 
-      return bot.sendMessage(
-        chatId,
-        '🔹 أدخل اسم المستخدم أو رقم الهوية:',
-        {
-          reply_markup: {
-            keyboard: [['🔐 دخول']],
-            resize_keyboard: true
-          }
-        }
-      );
+    delete userStates[chatId];
+
+    // أزرار حسب الدور
+    let keyboard = [];
+
+    if (role === 'student') {
+      keyboard = studentMenu;
+    } else if (role === 'teacher') {
+      keyboard = teacherMenu;
+    } else if (role === 'admin') {
+      keyboard = adminMenu;
+    }
+    bot.sendMessage(chatId,
+  '🔹 أدخل اسم المستخدم أو رقم الهوية:',
+  {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: '❌ إلغاء', callback_data: 'cancel_login' }]
+      ]
+    }
+  }
+);
+
     }
 
   } catch (err) {
@@ -1332,6 +1354,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
