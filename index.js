@@ -382,8 +382,8 @@ const keyboard = accounts.map(acc => ([
     return bot.sendMessage(chatId, '🔹 اختر الحساب الذي تريد الدخول فيه:', {
       reply_markup: {
         keyboard,
-        resize_keyboard: true,
-        one_time_keyboard: true
+      //  resize_keyboard: true,
+        //one_time_keyboard: true
       }
     });
 
@@ -1260,6 +1260,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
