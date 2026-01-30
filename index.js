@@ -361,7 +361,8 @@ if (text === '🔐 دخول إلى حساب آخر') {
       telegram_id: chatId
     });
 
-    const accounts = res.data.accounts || [];
+//    const accounts = res.data.accounts || [];
+      const accounts = [];
 
     // 2️⃣ إنشاء لوحة الأزرار
 const keyboard = accounts.map(acc => ([
@@ -1261,6 +1262,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
