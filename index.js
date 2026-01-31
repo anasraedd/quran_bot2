@@ -995,6 +995,13 @@ bot.on('callback_query', q => {
   // 🔁 تبديل حساب
   // =====================
   if (data.startsWith('switch:')) {
+//   bot.editMessageReplyMarkup(
+//   { inline_keyboard: [] },
+//   {
+//     chat_id: chatId,
+//     message_id: query.message.message_id
+//   }
+// );
 
     const userId = data.split(':')[1];
 
@@ -1033,7 +1040,26 @@ bot.on('callback_query', q => {
     if (data === 'login_new') 
     {
 
-// if (!userStates[chatId]) userStates[chatId] = {};
+      userStates[chatId] = {
+  waiting: 'login_username',
+  fromInline: true
+};
+
+return bot.sendMessage(
+  chatId,
+  '🔹 أدخل اسم المستخدم أو رقم الهوية:',
+  {
+    reply_markup: {
+      keyboard: [
+        ['❌ إلغاء'],
+        ['🔓 تسجيل الخروج']
+      ],
+      resize_keyboard: true
+    }
+  }
+);
+/*
+ if (!userStates[chatId]) userStates[chatId] = {};
       userStates[chatId].waiting = 'login_username';
 
       await bot.editMessageReplyMarkup(
@@ -1045,6 +1071,7 @@ bot.on('callback_query', q => {
 );
 
       return bot.sendMessage(chatId, '🔹 أدخل اسم المستخدم أو رقم الهوية:');
+      */
       //
  
 
@@ -1339,6 +1366,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
