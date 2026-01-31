@@ -979,14 +979,6 @@ bot.on('callback_query', q => {
     });
   }
 
-  bot.on('callback_query', async query => {
-
-  const chatId = query.message.chat.id;
-  const data = query.data;
-
- //     bot.answerCallbackQuery(query.id);
-
-
   try {
 
 
@@ -1084,7 +1076,7 @@ return bot.sendMessage(
     console.error('callback error:', err.message);
     return bot.sendMessage(chatId, '❌ حدث خطأ، حاول لاحقًا');
   }
-});
+
 
 /*
   if (s.waiting === 'switch_account') {
@@ -1369,6 +1361,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
