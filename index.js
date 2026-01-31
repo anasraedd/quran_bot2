@@ -951,18 +951,19 @@ if (s.waiting === 'end') {
 
 /* ================= CALLBACK ================= */
 
-bot.on('callback_query', q => {
+bot.on('callback_query', async (query) => {
+
   const chatId = q.message.chat.id;
   const data = q.data;
 
-  bot.answerCallbackQuery(q.id);
+ 
 // عند اختيار نوع الحساب من القائمة
 
   // نتأكد أن هناك حالة حالية للمستخدم
   if (!userStates[chatId]) userStates[chatId] = {};
 
     try {
-
+ bot.answerCallbackQuery(q.id);
     // =====================
   // 🔁 تبديل حساب
   // =====================
@@ -1363,6 +1364,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
