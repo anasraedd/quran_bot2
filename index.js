@@ -1001,7 +1001,10 @@ bot.on('callback_query', q => {
     return bot.sendMessage(
       chatId,
       `🌸 مرحبًا ${fullName}`,
-      keyboard
+       reply_markup: {
+      keyboard,
+      resize_keyboard: true
+    }
     );
   }
 
@@ -1009,26 +1012,26 @@ bot.on('callback_query', q => {
     // =========================
     // 🔐 دخول في حساب آخر يدويًا
     // =========================
-    if (data === 'login_new') 
+if (data === 'login_new') {
+
+  userStates[chatId] = {
+    waiting: 'login_username',
+    fromInline: true
+  };
+
+  return bot.sendMessage(
+    chatId,
+    '🔹 أدخل اسم المستخدم أو رقم الهوية:',
     {
-
-//       userStates[chatId] = {
-//   waiting: 'login_username',
-// //   fromInline: true
-// };
-
-return bot.sendMessage(
-  chatId,
-  '🔹 أدخل اسم المستخدم أو رقم الهوية:',
-  {
-    reply_markup: {
-      keyboard: [
-        ['❌ إلغاء']
-      ],
-     resize_keyboard: true
+      reply_markup: {
+        keyboard: [
+          ['❌ إلغاء']
+        ],
+        resize_keyboard: true
+      }
     }
-  }
-);
+  );
+
 
     
 /*
@@ -1360,6 +1363,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
