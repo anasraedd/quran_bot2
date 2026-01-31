@@ -1046,7 +1046,7 @@ bot.on('callback_query', q => {
 
 //       userStates[chatId] = {
 //   waiting: 'login_username',
-//   fromInline: true
+// //   fromInline: true
 // };
 
 return bot.sendMessage(
@@ -1054,10 +1054,10 @@ return bot.sendMessage(
   '🔹 أدخل اسم المستخدم أو رقم الهوية:',
   {
     reply_markup: {
-      inline_keyboard: [
+      keyboard: [
         ['❌ إلغاء']
       ],
-      resize_keyboard: true
+     resize_keyboard: true
     }
   }
 );
@@ -1369,6 +1369,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
