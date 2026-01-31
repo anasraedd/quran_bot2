@@ -385,7 +385,7 @@ if (text === '🔐 دخول إلى حساب آخر') {
 
     return bot.sendMessage(chatId, '🔹 اختر الحساب الذي تريد الدخول فيه:', {
       reply_markup: {
-        inline_keyboard: keyboard
+         keyboard: keyboard
       }
     });
 
@@ -1326,6 +1326,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
