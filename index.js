@@ -961,33 +961,9 @@ bot.on('callback_query', q => {
   // نتأكد أن هناك حالة حالية للمستخدم
   if (!userStates[chatId]) userStates[chatId] = {};
 
-  // حفظ نوع الحساب الذي اختاره
-  if (['role_admin', 'role_teacher', 'role_student'].includes(data)) {
-   userStates[chatId].role = data.split("_")[1];
-       // userStates[chatId].account_type = data;
+    try {
 
-     
-    userStates[chatId].waiting = 'full_name'; // الآن ينتظر الاسم الرباعي
-
-    // الرد عليه ليكتب الاسم الرباعي
-    bot.sendMessage(chatId, '✏️ اكتب الاسم الرباعي:');
-
-    // إزالة Inline Keyboard بعد الاختيار
-    bot.editMessageReplyMarkup({ inline_keyboard: [] }, {
-      chat_id: chatId,
-      message_id: callbackQuery.message.message_id
-    });
-  }
-
-  try {
-
-
-  // =====================
-  // ❌ إلغاء
-  // =====================
-
-
-  // =====================
+    // =====================
   // 🔁 تبديل حساب
   // =====================
   if (data.startsWith('switch:')) {
@@ -1076,6 +1052,27 @@ return bot.sendMessage(
     console.error('callback error:', err.message);
     return bot.sendMessage(chatId, '❌ حدث خطأ، حاول لاحقًا');
   }
+  // حفظ نوع الحساب الذي اختاره
+  if (['role_admin', 'role_teacher', 'role_student'].includes(data)) {
+   userStates[chatId].role = data.split("_")[1];
+       // userStates[chatId].account_type = data;
+
+     
+    userStates[chatId].waiting = 'full_name'; // الآن ينتظر الاسم الرباعي
+
+    // الرد عليه ليكتب الاسم الرباعي
+    bot.sendMessage(chatId, '✏️ اكتب الاسم الرباعي:');
+
+    // إزالة Inline Keyboard بعد الاختيار
+    bot.editMessageReplyMarkup({ inline_keyboard: [] }, {
+      chat_id: chatId,
+      message_id: callbackQuery.message.message_id
+    });
+  }
+
+
+ 
+
 
 
 /*
@@ -1361,6 +1358,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
