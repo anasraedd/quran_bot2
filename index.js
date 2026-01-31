@@ -470,7 +470,7 @@ console.log('LOGIN OK:', res.data);
   }
 
     // إذا نقر الزر "🔐 دخول" ولم يبدأ s.waiting بعد
-    if (text === '🔐 دخول' || text === '🔄 الدخول في حساب آخر') {
+    if (text === '🔐 دخول') {
       if (!userStates[chatId]) userStates[chatId] = {};
       userStates[chatId].waiting = 'login_username';
       return bot.sendMessage(chatId, '🔹 أدخل اسم المستخدم أو رقم الهوية:');
@@ -1029,34 +1029,11 @@ bot.on('callback_query', q => {
     // =========================
     if (data === 'login_new') {
 
-      userStates[chatId] = {
-        waiting: 'login_username'
-      };
-  const role = res.data.role;
-console.log('LOGIN OK:', res.data);
-
-    delete userStates[chatId];
-
-    // أزرار حسب الدور
-    let keyboard = [];
-
-    if (role === 'student') {
-      keyboard = studentMenu;
-    } else if (role === 'teacher') {
-      keyboard = teacherMenu;
-    } else if (role === 'admin') {
-      keyboard = adminMenu;
-    }
-    bot.sendMessage(chatId,
-  '🔹 أدخل اسم المستخدم أو رقم الهوية:',
-  {
-    reply_markup: {
-      inline_keyboard: [
-        [{ text: '❌ إلغاء', callback_data: 'cancel_login' }]
-      ]
-    }
-  }
-);
+ if (!userStates[chatId]) userStates[chatId] = {};
+      userStates[chatId].waiting = 'login_username';
+      return bot.sendMessage(chatId, '🔹 أدخل اسم المستخدم أو رقم الهوية:');
+      //
+ 
 
     }
 
@@ -1349,6 +1326,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
