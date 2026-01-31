@@ -351,6 +351,10 @@ bot.on('message', async msg => {
   }
 
   const s = userStates[chatId];
+
+  if (s?.fromInline) {
+  delete s.fromInline;
+}
 if (text === '🔐 دخول إلى حساب آخر') {
 
   try {
@@ -1366,6 +1370,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
