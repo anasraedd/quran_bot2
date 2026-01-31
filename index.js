@@ -980,6 +980,9 @@ bot.on('callback_query', q => {
   const chatId = query.message.chat.id;
   const data = query.data;
 
+      bot.answerCallbackQuery(query.id);
+
+
   try {
 
 
@@ -1027,10 +1030,20 @@ bot.on('callback_query', q => {
     // =========================
     // 🔐 دخول في حساب آخر يدويًا
     // =========================
-    if (data === 'login_new') {
+    if (data === 'login_new') 
+    {
 
  if (!userStates[chatId]) userStates[chatId] = {};
       userStates[chatId].waiting = 'login_username';
+
+      await bot.editMessageReplyMarkup(
+  { inline_keyboard: [] },
+  {
+    chat_id: chatId,
+    message_id: query.message.message_id
+  }
+);
+
       return bot.sendMessage(chatId, '🔹 أدخل اسم المستخدم أو رقم الهوية:');
       //
  
@@ -1326,6 +1339,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
