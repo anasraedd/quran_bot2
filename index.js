@@ -1044,10 +1044,10 @@ bot.on('callback_query', q => {
     if (data === 'login_new') 
     {
 
-      userStates[chatId] = {
-  waiting: 'login_username',
-  fromInline: true
-};
+//       userStates[chatId] = {
+//   waiting: 'login_username',
+//   fromInline: true
+// };
 
 return bot.sendMessage(
   chatId,
@@ -1369,6 +1369,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
