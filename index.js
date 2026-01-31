@@ -1002,10 +1002,9 @@ bot.on('callback_query', async (query) => {
     return bot.sendMessage(
       chatId,
       `🌸 مرحبًا ${fullName}`,
-       reply_markup: {
+       
       keyboard,
-      resize_keyboard: true
-    }
+     
     );
   }
 
@@ -1364,6 +1363,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
