@@ -1033,7 +1033,7 @@ bot.on('callback_query', q => {
     if (data === 'login_new') 
     {
 
- if (!userStates[chatId]) userStates[chatId] = {};
+// if (!userStates[chatId]) userStates[chatId] = {};
       userStates[chatId].waiting = 'login_username';
 
       await bot.editMessageReplyMarkup(
@@ -1339,6 +1339,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
