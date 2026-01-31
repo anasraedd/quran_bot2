@@ -967,13 +967,13 @@ bot.on('callback_query', q => {
   // 🔁 تبديل حساب
   // =====================
   if (data.startsWith('switch:')) {
-  bot.editMessageReplyMarkup(
-  { inline_keyboard: [] },
-  {
-    chat_id: chatId,
-    message_id: query.message.message_id
-  }
-);
+//   bot.editMessageReplyMarkup(
+//   { inline_keyboard: [] },
+//   {
+//     chat_id: chatId,
+//     message_id: query.message.message_id
+//   }
+// );
 
     const userId = data.split(':')[1];
 
@@ -1029,6 +1029,8 @@ return bot.sendMessage(
     }
   }
 );
+
+    
 /*
  if (!userStates[chatId]) userStates[chatId] = {};
       userStates[chatId].waiting = 'login_username';
@@ -1358,6 +1360,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
