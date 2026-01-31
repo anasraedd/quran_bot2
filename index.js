@@ -955,7 +955,7 @@ bot.on('callback_query', q => {
   const chatId = q.message.chat.id;
   const data = q.data;
 
-//  bot.answerCallbackQuery(q.id);
+  bot.answerCallbackQuery(q.id);
 // عند اختيار نوع الحساب من القائمة
 
   // نتأكد أن هناك حالة حالية للمستخدم
@@ -999,13 +999,13 @@ bot.on('callback_query', q => {
   // 🔁 تبديل حساب
   // =====================
   if (data.startsWith('switch:')) {
-//   bot.editMessageReplyMarkup(
-//   { inline_keyboard: [] },
-//   {
-//     chat_id: chatId,
-//     message_id: query.message.message_id
-//   }
-// );
+  bot.editMessageReplyMarkup(
+  { inline_keyboard: [] },
+  {
+    chat_id: chatId,
+    message_id: query.message.message_id
+  }
+);
 
     const userId = data.split(':')[1];
 
@@ -1054,9 +1054,8 @@ return bot.sendMessage(
   '🔹 أدخل اسم المستخدم أو رقم الهوية:',
   {
     reply_markup: {
-      keyboard: [
-        ['❌ إلغاء'],
-        ['🔓 تسجيل الخروج']
+      inline_keyboard: [
+        ['❌ إلغاء']
       ],
       resize_keyboard: true
     }
@@ -1370,6 +1369,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
