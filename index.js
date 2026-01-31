@@ -951,7 +951,7 @@ bot.on('callback_query', q => {
   const chatId = q.message.chat.id;
   const data = q.data;
 
-  bot.answerCallbackQuery(q.id);
+//  bot.answerCallbackQuery(q.id);
 // عند اختيار نوع الحساب من القائمة
 
   // نتأكد أن هناك حالة حالية للمستخدم
@@ -1339,6 +1339,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
