@@ -984,7 +984,7 @@ bot.on('callback_query', q => {
   const chatId = query.message.chat.id;
   const data = query.data;
 
-      bot.answerCallbackQuery(query.id);
+ //     bot.answerCallbackQuery(query.id);
 
 
   try {
@@ -1369,6 +1369,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
