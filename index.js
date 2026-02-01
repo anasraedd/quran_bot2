@@ -1022,12 +1022,12 @@ if (data === 'login_new') {
     chatId,
     '🔹 أدخل اسم المستخدم أو رقم الهوية:',
     
-
+    {
         reply_markup: {
          inline_keyboard:   ['❌ إلغاء']
       }
    
-      
+    }
     
   );
 
@@ -1362,6 +1362,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
