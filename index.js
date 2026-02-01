@@ -953,8 +953,8 @@ if (s.waiting === 'end') {
 
 bot.on('callback_query', async (query) => {
 
-  const chatId = q.message.chat.id;
-  const data = q.data;
+  const chatId = query.message.chat.id;
+  const data = query.data;
 
  
 // عند اختيار نوع الحساب من القائمة
@@ -963,7 +963,7 @@ bot.on('callback_query', async (query) => {
   if (!userStates[chatId]) userStates[chatId] = {};
 
     try {
- bot.answerCallbackQuery(q.id);
+ bot.answerCallbackQuery(query.id);
     // =====================
   // 🔁 تبديل حساب
   // =====================
@@ -1368,6 +1368,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
