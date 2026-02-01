@@ -1062,6 +1062,13 @@ if (data === 'login_new') {
     console.error('callback error:', err.message);
     return bot.sendMessage(chatId, '❌ حدث خطأ، حاول لاحقًا');
   }
+
+  if (data === 'cancel_login') {
+  delete userStates[chatId];
+
+  return bot.sendMessage(chatId, '❌ تم الإلغاء',);
+}
+
   // حفظ نوع الحساب الذي اختاره
   if (['role_admin', 'role_teacher', 'role_student'].includes(data)) {
    userStates[chatId].role = data.split("_")[1];
@@ -1368,6 +1375,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
