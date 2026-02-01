@@ -1021,13 +1021,14 @@ if (data === 'login_new') {
   return bot.sendMessage(
     chatId,
     '🔹 أدخل اسم المستخدم أو رقم الهوية:',
-    {
     
-        inline_keyboard: [
-          ['❌ إلغاء']
-        ],
+
+        reply_markup: {
+         inline_keyboard:   ['❌ إلغاء']
+      }
+   
       
-    }
+    
   );
 
 
@@ -1361,6 +1362,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
