@@ -1028,12 +1028,11 @@ if (data === 'login_new') {
     chatId,
     '🔹 أدخل اسم المستخدم أو رقم الهوية:',
     {
-      reply_markup: {
-        keyboard: [
+    
+        inline_keyboard: [
           ['❌ إلغاء']
         ],
-        resize_keyboard: true
-      }
+      
     }
   );
 
@@ -1368,6 +1367,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
