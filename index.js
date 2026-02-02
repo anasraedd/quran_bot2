@@ -1249,7 +1249,7 @@ if (data === 'login_new') {
   }]));
   keyboard.push([{ text: '❌ إلغاء', callback_data: 'cancel_halaqa' }]);
 
-  return bot.sendMessage(chatId, '👨‍🏫 اختر معلم الحلقة:',keyboard );
+  return bot.sendMessage(chatId, '👨‍🏫 اختر معلم الحلقة:' );
            
 
 }
@@ -1618,6 +1618,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
