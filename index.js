@@ -225,7 +225,7 @@ function normalizeSurah(text) {
 }
 
 // ثابت URL السكربت على Google Sheets
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby5vB-lQ0UcYv8caKgEn_ndZfnh7UzNLjt_qshF_u590JixFAWT6gan3o10U-hCuQmG/exec"; // ضع رابط السكربت هنا
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby22T7jAjE-Bk9G3GWWqrghm2lAyX3t4sXrcWjZ3DfnyUzAslvkkpqHbSUa6B-Zpy-d/exec"; // ضع رابط السكربت هنا
 
 const axios = require('axios');
 
@@ -454,7 +454,7 @@ return bot.sendMessage(chatId, '❌ المستخدم غير موجود، حاو�
 console.log('LOGIN OK:', res.data);
 
     delete userStates[chatId];
-    userStates[chatId]?.role = role;
+   // userStates[chatId]?.role = role;
 
     // أزرار حسب الدور
     let keyboard = [];
@@ -632,10 +632,14 @@ if (!res.data.ok && res.data.message === 'PASSWORD_EXISTS') {
 if (text === '➕ إنشاء حلقة') {
 
   // تأكد أن المستخدم أدمن
-  const role = userStates[chatId]?.role;
-  if (role !== 'admin') {
-    return bot.sendMessage(chatId, '❌ هذا الأمر مخصص للإدارة فقط');
-  }
+ const res = await axios.post(SCRIPT_URL, {
+  action: 'checkAdmin',
+  telegram_id: chatId
+});
+
+if (!res.data.isAdmin ) { // || chatId === 7405584377
+  return bot.sendMessage(chatId, '❌ هذا الأمر مخصص للإدارة فقط');
+}
 
   userStates[chatId] = {
     waiting: 'halaqa_name'
@@ -1107,7 +1111,7 @@ bot.on('callback_query', async (q) => {
     if (role === 'admin') keyboard = adminMenu;
 
     delete userStates[chatId];
-        userStates[chatId]?.role = role;
+   
 
 
     return bot.sendMessage(
@@ -1514,6 +1518,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
