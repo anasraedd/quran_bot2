@@ -1292,7 +1292,7 @@ if (data === 'login_new') {
       message_id: callbackQuery.message.message_id
     });
   }
-  */
+  
 
   /*
 
@@ -1641,6 +1641,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
