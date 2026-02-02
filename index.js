@@ -683,7 +683,7 @@ if (userStates[chatId]?.waiting === 'halaqa_name') {
         reply_markup: {
           
           inline_keyboard: [
-            [{ text: 'التالي'', callback_data: 'next_create_halaqa' }],
+            [{ text: 'التالي', callback_data: 'next_create_halaqa' }],
             [{ text: '❌ إلغاء', callback_data: 'cancle_create_halaqa' }],
            
           ]
@@ -1586,6 +1586,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
