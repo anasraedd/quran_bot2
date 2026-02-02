@@ -650,7 +650,7 @@ if (!res.data.isAdmin ) { // || chatId === 7405584377
     '✏️ أدخل اسم الحلقة:',
     {
       reply_markup: {
-        keyboard: [['❌ إلغاء']],
+        inline_keyboard: [['❌ إلغاء']],
         resize_keyboard: true
       }
     }
@@ -675,7 +675,7 @@ if (userStates[chatId]?.waiting === 'halaqa_name') {
 
   // نرسل رسالة بسيطة لتأكيد الاستلام فقط
   return bot.sendMessage(chatId, `✏️ تم حفظ اسم الحلقة: ${text}\nاضغط "التالي" لاختيار المعلم`, {
-    reply_markup: { keyboard: [['التالي'], ['❌ إلغاء']], resize_keyboard: true }
+    reply_markup: { inline_keyboard: [['التالي'], ['❌ إلغاء']], resize_keyboard: true }
   });
 }
 
@@ -1573,6 +1573,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
