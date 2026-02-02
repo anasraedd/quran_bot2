@@ -679,6 +679,23 @@ if (userStates[chatId]?.waiting === 'halaqa_name') {
   userStates[chatId].waiting = 'next_create_halaqa';
   */
 
+    const res = await axios.post(SCRIPT_URL, { action: 'getTeachers' });
+  const teachers = res.data.teachers || [];
+
+  if (teachers.length === 0) {
+    delete userStates[chatId];
+    return bot.sendMessage(chatId, '❌ لا يوجد معلمون مسجلون' );
+  }
+
+  // إنشاء أزرار للمعلمين
+  const keyboard = teachers.map(t => ([{
+    text: t.full_name,
+    callback_data: `select_teacher:${t.user_id}`
+  }]));
+  keyboard.push([{ text: '❌ إلغاء', callback_data: 'cancel_halaqa' }]);
+
+  return bot.sendMessage(chatId, '👨‍🏫 اختر معلم الحلقة:', keyboard );
+  /*
   // نرسل رسالة بسيطة لتأكيد الاستلام فقط
   return bot.sendMessage(chatId, `✏️ تم حفظ اسم الحلقة: ${text}\nاضغط "التالي" لاختيار المعلم`,
                            {
@@ -692,7 +709,9 @@ if (userStates[chatId]?.waiting === 'halaqa_name') {
         }
       }
     );
+  */
 }
+  
 
 
   /*-
@@ -1225,6 +1244,7 @@ if (data === 'login_new') {
 
   return bot.sendMessage(chatId, '❌ تم الإلغاء',);
 }
+  
 
     if (data === 'cancle_create_halaqa') {
   delete userStates[chatId];
@@ -1233,53 +1253,8 @@ if (data === 'login_new') {
 }
 
 
+  /*
      if (data === 'next_create_halaqa') {
-       /*
-         try {
-             const res = await axios.post(SCRIPT_URL, { action: 'getTeachers' });
-  const teachers = res.data.teachers || [];
-
-  if (teachers.length === 0) {
-    delete userStates[chatId];
-    return bot.sendMessage(chatId, '❌ لا يوجد معلمون مسجلون', );
-  }
-  
-
-    const accounts = res.data.accounts || [];
-
-    // 🔹 إنشاء أزرار الحسابات
-    const keyboard = accounts.map(acc => ([
-      {
-        text: acc.full_name,
-        callback_data: `switch:${acc.user_id}`
-      }
-    ]));
-
-    // 🔹 زر الدخول بحساب جديد
-    keyboard.push([
-      {
-        text: '🔄 الدخول في حساب آخر',
-        callback_data: 'login_new'
-      }
-    ]);
-
-    // 🔹 حفظ الحالة
-    userStates[chatId] = {
-      waiting: 'switch_account',
-      accounts
-    };
-
-    return bot.sendMessage(chatId, '🔹 اختر الحساب الذي تريد الدخول فيه:', {
-      reply_markup: {
-         inline_keyboard: keyboard
-      }
-    });
-
-  } catch (err) {
-    console.error('خطأ في جلب الحسابات غير النشطة:', err.message);
-    return bot.sendMessage(chatId, '❌ حدث خطأ، حاول لاحقًا.');
-  }
-       */
   const res = await axios.post(SCRIPT_URL, { action: 'getTeachers' });
   const teachers = res.data.teachers || [];
 
@@ -1299,6 +1274,7 @@ if (data === 'login_new') {
            
 
 }
+  */
   // حفظ نوع الحساب الذي اختاره
   if (['role_admin', 'role_teacher', 'role_student'].includes(data)) {
    userStates[chatId].role = data.split("_")[1];
@@ -1316,6 +1292,7 @@ if (data === 'login_new') {
       message_id: callbackQuery.message.message_id
     });
   }
+  */
 
   /*
 
@@ -1664,6 +1641,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
