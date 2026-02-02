@@ -657,6 +657,31 @@ if (!res.data.isAdmin ) { // || chatId === 7405584377
   );
 }
 
+
+  // =====================
+// 📝 اسم الحلقة
+// =====================
+if (userStates[chatId]?.waiting === 'halaqa_name') {
+  if (text === '❌ إلغاء') {
+    delete userStates[chatId];
+    return bot.sendMessage(chatId, '❎ تم الإلغاء', {
+      reply_markup: { keyboard: adminMenu, resize_keyboard: true }
+    });
+  }
+
+  // حفظ اسم الحلقة للخطوة التالية
+  userStates[chatId].halaqaName = text;
+  userStates[chatId].waiting = 'halaqa_teacher';
+
+  // نرسل رسالة بسيطة لتأكيد الاستلام فقط
+  return bot.sendMessage(chatId, `✏️ تم حفظ اسم الحلقة: ${text}\nاضغط "التالي" لاختيار المعلم`, {
+    reply_markup: { keyboard: [['التالي'], ['❌ إلغاء']], resize_keyboard: true }
+  });
+}
+
+
+  /*-
+
   // =====================
 // 📝 اسم الحلقة
 // =====================
@@ -685,7 +710,9 @@ if (userStates[chatId]?.waiting === 'halaqa_name') {
     }
   );
 }
+*/
 
+  /*
 
   // =====================
 // 👨‍🏫 معلم الحلقة
@@ -729,7 +756,7 @@ return bot.sendMessage(
 );
 
 }
-
+*/
 
 
   
@@ -1203,6 +1230,33 @@ if (data === 'login_new') {
   }
 
 
+// =====================
+// 👨‍🏫 اختيار المعلم
+// =====================
+// هنا يتم التعامل عند ضغط زر "التالي" أو عند callback query
+if (userStates[chatId]?.waiting === 'halaqa_teacher' && text === 'التالي') {
+  const res = await axios.post(SCRIPT_URL, { action: 'getTeachers' });
+  const teachers = res.data.teachers || [];
+
+  if (teachers.length === 0) {
+    delete userStates[chatId];
+    return bot.sendMessage(chatId, '❌ لا يوجد معلمون مسجلون', {
+      reply_markup: { keyboard: adminMenu, resize_keyboard: true }
+    });
+  }
+
+  // إنشاء أزرار للمعلمين
+  const keyboard = teachers.map(t => ([{
+    text: t.full_name,
+    callback_data: `select_teacher:${t.user_id}`
+  }]));
+  keyboard.push([{ text: '❌ إلغاء', callback_data: 'cancel_halaqa' }]);
+
+  return bot.sendMessage(chatId, '👨‍🏫 اختر معلم الحلقة:', {
+    reply_markup: { inline_keyboard: keyboard }
+  });
+}
+  
   // =====================
 // 👨‍🏫 اختيار معلم الحلقة
 // =====================
@@ -1230,6 +1284,7 @@ if (data.startsWith('select_teacher:')) {
     adminMenu
   );
 }
+  
 
  
 
@@ -1518,6 +1573,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
