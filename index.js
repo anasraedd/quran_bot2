@@ -697,9 +697,8 @@ if (userStates[chatId]?.waiting === 'halaqa_name') {
   keyboard.push([{ text: '❌ إلغاء', callback_data: 'cancel_halaqa' }]);
 
   return bot.sendMessage(chatId, '👨‍🏫 اختر معلم الحلقة:', 
-          
-          inline_keyboard: keyboard
-         ,
+    keyboard
+         
                       );
   /*
   // نرسل رسالة بسيطة لتأكيد الاستلام فقط
@@ -1663,6 +1662,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
