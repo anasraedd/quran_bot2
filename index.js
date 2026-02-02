@@ -225,7 +225,7 @@ function normalizeSurah(text) {
 }
 
 // ثابت URL السكربت على Google Sheets
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzR2MqpHPsuD16t3FurgvW-zgAeYUQvJh3IuXytPOLYizI0xMJw8h9HOLp1-ZYyaE5s/exec"; // ضع رابط السكربت هنا
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby5vB-lQ0UcYv8caKgEn_ndZfnh7UzNLjt_qshF_u590JixFAWT6gan3o10U-hCuQmG/exec"; // ضع رابط السكربت هنا
 
 const axios = require('axios');
 
@@ -279,6 +279,8 @@ const adminMenu = {
   reply_markup: {
     keyboard: [
       [{ text: 'إنشاء حساب' }],
+        ['➕ إنشاء حلقة'],
+      ['📋 الحلقات'],
       [{ text: '🧭 لوحة التحكم' }],
   [{ text: '🔐 دخول إلى حساب آخر' }],      
        ['🚪 تسجيل خروج']
@@ -621,6 +623,111 @@ if (!res.data.ok && res.data.message === 'PASSWORD_EXISTS') {
 
     return bot.sendMessage(chatId, '❌ لم يتم إنشاء الحساب، حاول مرة أخرى');
   }
+
+  // =====================
+// ➕ إنشاء حلقة (أدمن)
+// =====================
+if (text === '➕ إنشاء حلقة') {
+
+  // تأكد أن المستخدم أدمن
+  const role = userStates[chatId]?.role;
+  if (role !== 'admin') {
+    return bot.sendMessage(chatId, '❌ هذا الأمر مخصص للإدارة فقط');
+  }
+
+  userStates[chatId] = {
+    waiting: 'halaqa_name'
+  };
+
+  return bot.sendMessage(
+    chatId,
+    '✏️ أدخل اسم الحلقة:',
+    {
+      reply_markup: {
+        keyboard: [['❌ إلغاء']],
+        resize_keyboard: true
+      }
+    }
+  );
+}
+
+  // =====================
+// 📝 اسم الحلقة
+// =====================
+if (userStates[chatId]?.waiting === 'halaqa_name') {
+
+  if (text === '❌ إلغاء') {
+    delete userStates[chatId];
+    return bot.sendMessage(chatId, '❎ تم الإلغاء', adminMenu);
+  }
+
+  const halaqaName = text;
+
+  userStates[chatId] = {
+    waiting: 'halaqa_teacher',
+    halaqaName
+  };
+
+  return bot.sendMessage(
+    chatId,
+    '',
+    {
+      reply_markup: {
+        keyboard: [['❌ إلغاء']],
+        resize_keyboard: true
+      }
+    }
+  );
+}
+
+
+  // =====================
+// 👨‍🏫 معلم الحلقة
+// =====================
+if (userStates[chatId]?.waiting === 'halaqa_teacher') {
+const halaqaName = text;
+
+// طلب قائمة المعلمين من السيرفر
+const res = await axios.post(SCRIPT_URL, {
+  action: 'getTeachers'
+});
+
+const teachers = res.data.teachers || [];
+
+if (teachers.length === 0) {
+  delete userStates[chatId];
+  return bot.sendMessage(chatId, '❌ لا يوجد معلمون مسجلون');
+}
+
+// إنشاء أزرار
+const keyboard = teachers.map(t => ([
+  {
+    text: t.full_name,
+    callback_data: `select_teacher:${t.user_id}`
+  }
+]));
+
+userStates[chatId] = {
+  waiting: 'halaqa_teacher',
+  halaqaName
+};
+
+return bot.sendMessage(
+  chatId,
+  '👨‍🏫 اختر معلم الحلقة:',
+  {
+    reply_markup: {
+      inline_keyboard: keyboard
+    }
+  }
+);
+
+}
+
+
+
+  
+
 
   // =========================
 // تسجيل الخروج
@@ -1088,6 +1195,34 @@ if (data === 'login_new') {
   }
 
 
+  // =====================
+// 👨‍🏫 اختيار معلم الحلقة
+// =====================
+if (data.startsWith('select_teacher:')) {
+
+  const teacherId = data.split(':')[1];
+  const s = userStates[chatId];
+
+  if (!s || s.waiting !== 'halaqa_teacher') {
+    return bot.answerCallbackQuery(query.id);
+  }
+
+  const halaqaName = s.halaqaName;
+
+  // ⏳ لاحقًا سنرسل createHalaqa للسيرفر
+  // الآن تأكيد فقط
+
+  delete userStates[chatId];
+
+  await bot.answerCallbackQuery(query.id);
+
+  return bot.sendMessage(
+    chatId,
+    `✅ تم إنشاء الحلقة بنجاح\n\n📘 الحلقة: ${halaqaName}\n👨‍🏫 المعلم: تم اختياره`,
+    adminMenu
+  );
+}
+
  
 
 
@@ -1375,6 +1510,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
