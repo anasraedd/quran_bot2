@@ -556,7 +556,9 @@ if (userStates[chatId]?.waiting === 'new_user_input') {
         }
       };
 
-      return bot.sendMessage(chatId, '✅ اختر نوع الحساب:', roleKeyboard);
+      return bot.sendMessage(chatId, '✅ اختر نوع الحساب:', roleKeyboard,
+                                  
+);
 
     } catch (err) {
       console.error(err);
@@ -1142,13 +1144,13 @@ bot.on('callback_query', async (q) => {
   // 🔁 تبديل حساب
   // =====================
   if (data.startsWith('switch:')) {
-//   bot.editMessageReplyMarkup(
-//   { inline_keyboard: [] },
-//   {
-//     chat_id: chatId,
-//     message_id: query.message.message_id
-//   }
-// );
+  bot.editMessageReplyMarkup(
+  { inline_keyboard: [] },
+  {
+    chat_id: chatId,
+    message_id: q.message.message_id
+  }
+);
 
     const userId = data.split(':')[1];
 
@@ -1215,6 +1217,13 @@ if (data === 'login_new') {
     
   );
 
+    await bot.editMessageReplyMarkup(
+  { inline_keyboard: [] },
+  {
+    chat_id: chatId,
+    message_id: q.message.message_id
+  }
+);
 
     
 /*
@@ -1289,10 +1298,17 @@ if (data === 'login_new') {
     bot.sendMessage(chatId, '✏️ اكتب الاسم الرباعي:');
 
     // إزالة Inline Keyboard بعد الاختيار
-    bot.editMessageReplyMarkup({ inline_keyboard: [] }, {
-      chat_id: chatId,
-   //  message_id: callbackQuery.message.message_id
-    });
+       await bot.editMessageReplyMarkup(
+  { inline_keyboard: [] },
+  {
+    chat_id: chatId,
+    message_id: q.message.message_id
+  }
+);
+   //  bot.editMessageReplyMarkup({ inline_keyboard: [] }, {
+   //    chat_id: chatId,
+   // //  message_id: callbackQuery.message.message_id
+   //  });
   }
   
 
@@ -1643,6 +1659,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
