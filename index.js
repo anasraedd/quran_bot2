@@ -666,6 +666,7 @@ if (!res.data.isAdmin ) { // || chatId === 7405584377
 // 📝 اسم الحلقة
 // =====================
 if (userStates[chatId]?.waiting === 'halaqa_name') {
+  /*
   if (text === '❌ إلغاء') {
     delete userStates[chatId];
     return bot.sendMessage(chatId, '❎ تم الإلغاء', {
@@ -676,6 +677,7 @@ if (userStates[chatId]?.waiting === 'halaqa_name') {
   // حفظ اسم الحلقة للخطوة التالية
 //  userStates[chatId].halaqaName = text;
   userStates[chatId].waiting = 'next_create_halaqa';
+  */
 
   // نرسل رسالة بسيطة لتأكيد الاستلام فقط
   return bot.sendMessage(chatId, `✏️ تم حفظ اسم الحلقة: ${text}\nاضغط "التالي" لاختيار المعلم`,
@@ -1618,6 +1620,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
