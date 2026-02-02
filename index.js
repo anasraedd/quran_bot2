@@ -649,11 +649,15 @@ if (!res.data.isAdmin ) { // || chatId === 7405584377
     chatId,
     '✏️ أدخل اسم الحلقة:',
     {
-      reply_markup: {
-        inline_keyboard: [['❌ إلغاء']],
-        resize_keyboard: true
+        reply_markup: {
+          
+          inline_keyboard: [
+            [{ text: '❌ إلغاء'', callback_data: 'cancle_create_halaqa' }],
+           
+          ]
+        }
       }
-    }
+  
   );
 }
 
@@ -674,9 +678,18 @@ if (userStates[chatId]?.waiting === 'halaqa_name') {
   userStates[chatId].waiting = 'halaqa_teacher';
 
   // نرسل رسالة بسيطة لتأكيد الاستلام فقط
-  return bot.sendMessage(chatId, `✏️ تم حفظ اسم الحلقة: ${text}\nاضغط "التالي" لاختيار المعلم`, {
-    reply_markup: { inline_keyboard: [['التالي'], ['❌ إلغاء']], resize_keyboard: true }
-  });
+  return bot.sendMessage(chatId, `✏️ تم حفظ اسم الحلقة: ${text}\nاضغط "التالي" لاختيار المعلم`,
+                           {
+        reply_markup: {
+          
+          inline_keyboard: [
+            [{ text: 'التالي'', callback_data: 'next_create_halaqa' }],
+            [{ text: '❌ إلغاء'', callback_data: 'cancle_create_halaqa' }],
+           
+          ]
+        }
+      }
+    );
 }
 
 
@@ -1573,6 +1586,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
