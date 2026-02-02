@@ -1180,7 +1180,7 @@ bot.on('callback_query', async (q) => {
       `🌸 مرحبًا ${fullName}`,
        
        keyboard, 
-           message_id: callbackQuery.message.message_id
+        //   message_id: callbackQuery.message.message_id
 
     );
   }
@@ -1291,7 +1291,7 @@ if (data === 'login_new') {
     // إزالة Inline Keyboard بعد الاختيار
     bot.editMessageReplyMarkup({ inline_keyboard: [] }, {
       chat_id: chatId,
-     message_id: callbackQuery.message.message_id
+   //  message_id: callbackQuery.message.message_id
     });
   }
   
@@ -1643,6 +1643,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
