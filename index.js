@@ -9,6 +9,9 @@ const db = new Database('bot_data.db');
 
 const userStates = {};
 
+const pendingHalaqaBind = {};
+
+
 
 /* ================= DATABASE ================= */
 
@@ -225,7 +228,7 @@ function normalizeSurah(text) {
 }
 
 // ثابت URL السكربت على Google Sheets
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw_p5Gpbp28_cwp8SL4N52XNWDuaKyDENct-GJWnpcyN2YFkLpOveuhE5UyCIweLtyJ/exec"; // ضع رابط السكربت هنا
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzYVs9Vggr3p6YNV878wrOyeMrqqLiBJEetyK50gEs_Q-ztokNoWRicbpyK3Vu6FaBn/exec"; // ضع رابط السكربت هنا
 
 const axios = require('axios');
 
@@ -280,7 +283,7 @@ const adminMenu = {
     keyboard: [
       [{ text: 'إنشاء حساب' }],
         ['➕ إنشاء حلقة'],
-      ['📋 الحلقات'],
+      ['⚙️ إدارة الحلقات'],
       [{ text: '🧭 لوحة التحكم' }],
   [{ text: '🔐 دخول إلى حساب آخر' }],      
        ['🚪 تسجيل خروج']
@@ -315,6 +318,7 @@ const teacherMenu = {
   reply_markup: {
     keyboard: [
       [{ text: '➕ إضافة إنجاز لطالب' }],
+         [{ text: '👥 إدارة طلاب الحلقة' }],
       [{ text: '🧭 لوحة التحكم' }],
       [{ text: '📊 الإنجازات غير المقيمة' }],
        [{ text: '🔐 دخول إلى حساب آخر' }],   
@@ -357,6 +361,7 @@ bot.on('message', async msg => {
   if (s?.fromInline) {
   delete s.fromInline;
 }
+  
 if (text === '🔐 دخول إلى حساب آخر') {
 
   try {
@@ -520,6 +525,15 @@ console.log('LOGIN OK:', res.data);
   // خطوة 1: بدء إنشاء الحساب
   // =============================
 if (text === 'إنشاء حساب') {
+    // تأكد أن المستخدم أدمن
+ const res = await axios.post(SCRIPT_URL, {
+  action: 'checkAdmin',
+  telegram_id: chatId
+});
+
+if (!res.data.isAdmin ) { // || chatId === 7405584377
+  return bot.sendMessage(chatId, '❌ هذا الأمر مخصص للإدارة فقط');
+}
   userStates[chatId] = { waiting: 'new_user_input' };
   return bot.sendMessage(chatId, '🔹 أدخل اسم المستخدم أو رقم الهوية:');
 }
@@ -668,18 +682,52 @@ if (!res.data.isAdmin ) { // || chatId === 7405584377
 // 📝 اسم الحلقة
 // =====================
 if (userStates[chatId]?.waiting === 'halaqa_name') {
-  /*
-  if (text === '❌ إلغاء') {
-    delete userStates[chatId];
-    return bot.sendMessage(chatId, '❎ تم الإلغاء', {
-      reply_markup: { keyboard: adminMenu, resize_keyboard: true }
-    });
+
+  const halaqaName = text.trim();
+
+  if (!halaqaName) {
+    return bot.sendMessage(chatId, '❌ اسم الحلقة غير صالح');
   }
 
-  // حفظ اسم الحلقة للخطوة التالية
-//  userStates[chatId].halaqaName = text;
-  userStates[chatId].waiting = 'next_create_halaqa';
-  */
+  const res = await axios.post(SCRIPT_URL, { action: 'getTeachers' });
+  const teachers = res.data.teachers || [];
+
+  if (teachers.length === 0) {
+    delete userStates[chatId];
+    return bot.sendMessage(chatId, '❌ لا يوجد معلمون مسجلون');
+  }
+
+  // خزّن اسم الحلقة
+  userStates[chatId] = {
+    waiting: 'select_teacher',
+    halaqaName
+  };
+
+  // أزرار المعلمين
+  const keyboard = teachers.map(t => ([{
+    text: t.full_name,
+    callback_data: `select_teacher:${t.user_id}`
+  }]));
+
+  keyboard.push([{ text: '❌ إلغاء', callback_data: 'cancel_halaqa' }]);
+
+  return bot.sendMessage(
+    chatId,
+    '👨‍🏫 اختر معلم الحلقة:',
+    {
+      reply_markup: {
+        inline_keyboard: keyboard
+      }
+    }
+  );
+}
+
+
+  /*
+  // =====================
+// 📝 اسم الحلقة
+// =====================
+if (userStates[chatId]?.waiting === 'halaqa_name') {
 
     const res = await axios.post(SCRIPT_URL, { action: 'getTeachers' });
   const teachers = res.data.teachers || [];
@@ -703,102 +751,10 @@ if (userStates[chatId]?.waiting === 'halaqa_name') {
       }
     }
                       );
-  /*
-  // نرسل رسالة بسيطة لتأكيد الاستلام فقط
-  return bot.sendMessage(chatId, `✏️ تم حفظ اسم الحلقة: ${text}\nاضغط "التالي" لاختيار المعلم`,
-                           {
-        reply_markup: {
-          
-          inline_keyboard: [
-            [{ text: 'التالي', callback_data: 'next_create_halaqa' }],
-            [{ text: '❌ إلغاء', callback_data: 'cancle_create_halaqa' }],
-           
-          ]
-        }
-      }
-    );
+
+}
   */
-}
   
-
-
-  /*-
-
-  // =====================
-// 📝 اسم الحلقة
-// =====================
-if (userStates[chatId]?.waiting === 'halaqa_name') {
-
-  if (text === '❌ إلغاء') {
-    delete userStates[chatId];
-    return bot.sendMessage(chatId, '❎ تم الإلغاء', adminMenu);
-  }
-
-  const halaqaName = text;
-
-  userStates[chatId] = {
-    waiting: 'halaqa_teacher',
-    halaqaName
-  };
-
-  return bot.sendMessage(
-    chatId,
-    '',
-    {
-      reply_markup: {
-        keyboard: [['❌ إلغاء']],
-        resize_keyboard: true
-      }
-    }
-  );
-}
-*/
-
-  /*
-
-  // =====================
-// 👨‍🏫 معلم الحلقة
-// =====================
-if (userStates[chatId]?.waiting === 'halaqa_teacher') {
-const halaqaName = text;
-
-// طلب قائمة المعلمين من السيرفر
-const res = await axios.post(SCRIPT_URL, {
-  action: 'getTeachers'
-});
-
-const teachers = res.data.teachers || [];
-
-if (teachers.length === 0) {
-  delete userStates[chatId];
-  return bot.sendMessage(chatId, '❌ لا يوجد معلمون مسجلون');
-}
-
-// إنشاء أزرار
-const keyboard = teachers.map(t => ([
-  {
-    text: t.full_name,
-    callback_data: `select_teacher:${t.user_id}`
-  }
-]));
-
-userStates[chatId] = {
-  waiting: 'halaqa_teacher',
-  halaqaName
-};
-
-return bot.sendMessage(
-  chatId,
-  '👨‍🏫 اختر معلم الحلقة:',
-  {
-    reply_markup: {
-      inline_keyboard: keyboard
-    }
-  }
-);
-
-}
-*/
 
 
   
@@ -1316,6 +1272,53 @@ if (data === 'login_new') {
    // //  message_id: callbackQuery.message.message_id
    //  });
   }
+
+
+
+
+    // =====================
+// 👨‍🏫 اختيار معلم الحلقة
+// =====================
+if (q.data.startsWith('select_teacher:')) {
+
+  const chatId = q.message.chat.id;
+  const teacherId = q.data.split(':')[1];
+
+  const state = userStates[chatId];
+  if (!state || state.waiting !== 'select_teacher') {
+    return bot.answerCallbackQuery(q.id);
+  }
+
+  const halaqaName = state.halaqaName;
+
+  // تنظيف الأزرار
+  await bot.editMessageReplyMarkup(
+    { inline_keyboard: [] },
+    {
+      chat_id: chatId,
+      message_id: q.message.message_id
+    }
+  );
+
+  // حفظ الحلقة في Google Sheet
+  const res = await axios.post(SCRIPT_URL, {
+    action: 'createHalaqa',
+    halaqa_name: halaqaName,
+    teacher_id: teacherId
+  });
+
+  delete userStates[chatId];
+
+  if (!res.data.success) {
+    return bot.sendMessage(chatId, '❌ حدث خطأ أثناء إنشاء الحلقة');
+  }
+
+  return bot.sendMessage(
+    chatId,
+    `✅ تم إنشاء الحلقة بنجاح\n📘 اسم الحلقة: ${halaqaName}`
+  );
+}
+
   
 
   /*
@@ -1348,34 +1351,56 @@ if (userStates[chatId]?.waiting === 'halaqa_teacher' && text === 'التالي')
   });
 }
   */
-  
+
+  /*
   // =====================
 // 👨‍🏫 اختيار معلم الحلقة
 // =====================
 if (data.startsWith('select_teacher:')) {
+  const chatId = q.message.chat.id;
+  const messageId = q.message.message_id;
 
   const teacherId = data.split(':')[1];
-  const s = userStates[chatId];
 
-  if (!s || s.waiting !== 'halaqa_teacher') {
-    return bot.answerCallbackQuery(q.id);
+  // إخفاء أزرار اختيار المعلمين
+  await bot.editMessageReplyMarkup(
+    { inline_keyboard: [] },
+    {
+      chat_id: chatId,
+      message_id: messageId
+    }
+  );
+
+ const { halaqaName, teacherId } = userStates[chatId];
+
+  // إرسال البيانات إلى Google Sheets
+  const res = await axios.post(SCRIPT_URL, {
+    action: 'createHalaqa',
+    halaqa_name: halaqaName,
+    teacher_id: teacherId,
+    group_link: groupLink
+  });
+
+  if (!res.data.ok) {
+    return bot.sendMessage(chatId, '❌ فشل إنشاء الحلقة');
   }
-
-  const halaqaName = s.halaqaName;
-
-  // ⏳ لاحقًا سنرسل createHalaqa للسيرفر
-  // الآن تأكيد فقط
 
   delete userStates[chatId];
 
-  await bot.answerCallbackQuery(query.id);
-
   return bot.sendMessage(
     chatId,
-    `✅ تم إنشاء الحلقة بنجاح\n\n📘 الحلقة: ${halaqaName}\n👨‍🏫 المعلم: تم اختياره`,
+    '✅ تم إنشاء الحلقة بنجاح',
     adminMenu
   );
 }
+
+  return bot.sendMessage(
+    chatId,
+    '🔗 أرسل رابط مجموعة الحلقة (Telegram group link):'
+  );
+ 
+}
+       */
   
 
  
@@ -1665,6 +1690,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
