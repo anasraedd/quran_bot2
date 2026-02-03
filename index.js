@@ -228,7 +228,7 @@ function normalizeSurah(text) {
 }
 
 // ثابت URL السكربت على Google Sheets
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzYVs9Vggr3p6YNV878wrOyeMrqqLiBJEetyK50gEs_Q-ztokNoWRicbpyK3Vu6FaBn/exec"; // ضع رابط السكربت هنا
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwKUa6M62D66MHGyZv2DaRK9ANMC0M21tighSS0Zl6tYAtFZQArM8HWSqXcFfkyQ7MA/exec"; // ضع رابط السكربت هنا
 
 const axios = require('axios');
 
@@ -361,6 +361,42 @@ bot.on('message', async msg => {
   if (s?.fromInline) {
   delete s.fromInline;
 }
+
+
+  bot.on('message', async (msg) => {
+
+  if (!msg.text) return;
+
+  const text = msg.text.trim();
+  const chatId = msg.chat.id;
+  const fromId = msg.from.id;
+
+  // نتحقق أنها مجموعة
+  if (
+    msg.chat.type !== 'group' &&
+    msg.chat.type !== 'supergroup'
+  ) return;
+
+  // النص المعتمد
+  if (text !== 'ربط المجموعة بحلقتي') return;
+
+  // تحقق أن المرسل معلم
+  const res = await axios.post(SCRIPT_URL, {
+    action: 'linkHalaqaGroup',
+    telegram_id: fromId,
+    group_id: chatId
+  });
+
+  if (!res.data.success) {
+    return bot.sendMessage(chatId, '❌ لا يمكنك ربط هذه المجموعة');
+  }
+
+  return bot.sendMessage(
+    chatId,
+    '✅ تم ربط المجموعة بالحَلْقة بنجاح'
+  );
+});
+
   
 if (text === '🔐 دخول إلى حساب آخر') {
 
@@ -1690,6 +1726,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
