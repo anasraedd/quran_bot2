@@ -1358,7 +1358,7 @@ if (data.startsWith('select_teacher:')) {
   const s = userStates[chatId];
 
   if (!s || s.waiting !== 'halaqa_teacher') {
-    return bot.answerCallbackQuery(query.id);
+    return bot.answerCallbackQuery(q.id);
   }
 
   const halaqaName = s.halaqaName;
@@ -1665,6 +1665,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
