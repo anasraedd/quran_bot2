@@ -449,7 +449,8 @@ try {
   const s = userStates[chatId] || {};
 
   // 1️⃣ إذا المستخدم في مرحلة تسجيل الدخول، نتخطى التحقق من الجلسة
-  if (!s.waiting || s.waiting === 'login_username' || s.waiting === 'login_password') {
+  if (!s.waiting || s.waiting === 'login_username' || s.waiting === 'login_password' || (   msg.chat.type === 'group' &&
+    msg.chat.type === 'supergroup')) {
 
        // إدخال اسم المستخدم
   // =========================
@@ -1724,6 +1725,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
