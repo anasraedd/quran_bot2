@@ -363,36 +363,7 @@ bot.on('message', async msg => {
 }
 
 
-  if (!msg.text) return;
-
-  const text = msg.text.trim();
-  const chatId = msg.chat.id;
-  const fromId = msg.from.id;
-
-  // نتحقق أنها مجموعة
-  if (
-    msg.chat.type !== 'group' &&
-    msg.chat.type !== 'supergroup'
-  ) return;
-
-  // النص المعتمد
-  if (text !== 'ربط المجموعة بحلقتي') return;
-
-  // تحقق أن المرسل معلم
-  const res = await axios.post(SCRIPT_URL, {
-    action: 'linkHalaqaGroup',
-    telegram_id: fromId,
-    group_id: chatId
-  });
-
-  if (!res.data.success) {
-    return bot.sendMessage(chatId, '❌ لا يمكنك ربط هذه المجموعة');
-  }
-
-  return bot.sendMessage(
-    chatId,
-    '✅ تم ربط المجموعة بالحَلْقة بنجاح'
-  );
+ 
 
 
   
@@ -447,7 +418,33 @@ if (!text) return;
 
 try {
   const s = userStates[chatId] || {};
+  
+ const fromId = msg.from.id;
 
+  // نتحقق أنها مجموعة
+  if (
+    msg.chat.type !== 'group' &&
+    msg.chat.type !== 'supergroup'
+  ) return;
+
+  // النص المعتمد
+  if (text !== 'ربط المجموعة بحلقتي') return;
+
+  // تحقق أن المرسل معلم
+  const res = await axios.post(SCRIPT_URL, {
+    action: 'linkHalaqaGroup',
+    telegram_id: fromId,
+    group_id: chatId
+  });
+
+  if (!res.data.success) {
+    return bot.sendMessage(chatId, '❌ لا يمكنك ربط هذه المجموعة');
+  }
+
+  return bot.sendMessage(
+    chatId,
+    '✅ تم ربط المجموعة بالحَلْقة بنجاح'
+  );
   // 1️⃣ إذا المستخدم في مرحلة تسجيل الدخول، نتخطى التحقق من الجلسة
   if (!s.waiting || s.waiting === 'login_username' || s.waiting === 'login_password' || (   msg.chat.type === 'group' &&
     msg.chat.type === 'supergroup')) {
@@ -1725,6 +1722,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
