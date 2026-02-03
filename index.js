@@ -228,7 +228,7 @@ function normalizeSurah(text) {
 }
 
 // ثابت URL السكربت على Google Sheets
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwKUa6M62D66MHGyZv2DaRK9ANMC0M21tighSS0Zl6tYAtFZQArM8HWSqXcFfkyQ7MA/exec"; // ضع رابط السكربت هنا
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwnBsSz5fWGu4cJkZb0HCeF-k5r0iDGzZUJE1GbBlSv_xbgwJywHcG7SFf4Zoo52Vzw/exec"; // ضع رابط السكربت هنا
 
 const axios = require('axios');
 
@@ -446,8 +446,7 @@ try {
     '✅ تم ربط المجموعة بالحَلْقة بنجاح'
   );
   // 1️⃣ إذا المستخدم في مرحلة تسجيل الدخول، نتخطى التحقق من الجلسة
-  if (!s.waiting || s.waiting === 'login_username' || s.waiting === 'login_password' || (   msg.chat.type === 'group' &&
-    msg.chat.type === 'supergroup')) {
+  if (!s.waiting || s.waiting === 'login_username' || s.waiting === 'login_password') {
 
        // إدخال اسم المستخدم
   // =========================
@@ -1722,6 +1721,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
