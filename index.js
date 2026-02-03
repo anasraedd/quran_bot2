@@ -363,8 +363,6 @@ bot.on('message', async msg => {
 }
 
 
-  bot.on('message', async (msg) => {
-
   if (!msg.text) return;
 
   const text = msg.text.trim();
@@ -395,7 +393,7 @@ bot.on('message', async msg => {
     chatId,
     '✅ تم ربط المجموعة بالحَلْقة بنجاح'
   );
-});
+
 
   
 if (text === '🔐 دخول إلى حساب آخر') {
@@ -1726,6 +1724,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
