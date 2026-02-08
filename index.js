@@ -12,15 +12,6 @@ const userStates = {};
 //const pendingHalaqaBind = {};
 
 
-userStates[chatId] = {
-  waiting: 'add_students',
-  selectedStudents: new Set(),
-  studentsList: [] // قائمة الطلاب المعروضة
-};
-
-
-
-
 /* ================= DATABASE ================= */
 
 db.exec(`
@@ -1395,6 +1386,13 @@ if (q.data.startsWith('select_teacher:')) {
 }
 
   if (data === 'add_student') {
+userStates[chatId] = {
+  waiting: 'add_students',
+  selectedStudents: new Set(),
+  studentsList: [] // قائمة الطلاب المعروضة
+};
+
+
 
   // جلب الطلاب غير المضافين
   const res = await axios.post(SCRIPT_URL, {
@@ -1890,6 +1888,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
