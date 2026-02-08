@@ -1431,6 +1431,10 @@ if (q.data.startsWith('select_teacher:')) {
 
   return bot.editMessageText(
     '👥 اختر الطلاب لإضافتهم إلى الحلقة:',
+    {
+      chat_id: chatId,
+      message_id: q.message.message_id
+    }
     /*
        {
       //      chat_id: chatId,
@@ -1902,6 +1906,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
