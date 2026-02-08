@@ -419,6 +419,39 @@ if (text === '🔐 دخول إلى حساب آخر') {
   }
 }
 
+    if (text === '👥 إدارة طلاب الحلقة') {
+
+  // 1️⃣ تأكد أن المستخدم معلم
+  const res = await axios.post(SCRIPT_URL, {
+    action: 'checkTeacher',
+    telegram_id: chatId
+  });
+
+  if (!res.data.isTeacher) {
+    return bot.sendMessage(chatId, '❌ هذا الخيار مخصص للمعلمين فقط');
+  }
+
+  // 2️⃣ خزّن حالة إدارة الطلاب
+  userStates[chatId] = {
+    waiting: 'manage_students'
+  };
+
+  return bot.sendMessage(
+    chatId,
+    '👥 إدارة طلاب الحلقة:',
+    {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: '➕ إضافة طالب', callback_data: 'add_student' }],
+          [{ text: '➖ حذف طالب', callback_data: 'remove_student' }],
+          [{ text: '❌ إغلاق', callback_data: 'close_manage_students' }]
+        ]
+      }
+    }
+  );
+}
+
+
 
 
 // 🔹 تجاهل الرسائل بدون نص
@@ -558,37 +591,6 @@ console.log('LOGIN OK:', res.data);
   }
   */
 
-  if (text === '👥 إدارة طلاب الحلقة') {
-
-  // 1️⃣ تأكد أن المستخدم معلم
-  const res = await axios.post(SCRIPT_URL, {
-    action: 'checkTeacher',
-    telegram_id: chatId
-  });
-
-  if (!res.data.isTeacher) {
-    return bot.sendMessage(chatId, '❌ هذا الخيار مخصص للمعلمين فقط');
-  }
-
-  // 2️⃣ خزّن حالة إدارة الطلاب
-  userStates[chatId] = {
-    waiting: 'manage_students'
-  };
-
-  return bot.sendMessage(
-    chatId,
-    '👥 إدارة طلاب الحلقة:',
-    {
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: '➕ إضافة طالب', callback_data: 'add_student' }],
-          [{ text: '➖ حذف طالب', callback_data: 'remove_student' }],
-          [{ text: '❌ إغلاق', callback_data: 'close_manage_students' }]
-        ]
-      }
-    }
-  );
-}
 
 
 
@@ -1888,6 +1890,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
