@@ -9,7 +9,15 @@ const db = new Database('bot_data.db');
 
 const userStates = {};
 
-const pendingHalaqaBind = {};
+//const pendingHalaqaBind = {};
+
+
+userStates[chatId] = {
+  waiting: 'add_students',
+  selectedStudents: new Set(),
+  studentsList: [] // قائمة الطلاب المعروضة
+};
+
 
 
 
@@ -228,7 +236,7 @@ function normalizeSurah(text) {
 }
 
 // ثابت URL السكربت على Google Sheets
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzA8Bw6TTkUAJqUPRlq_zP5wU73O8_0Z_1kdRWU6RkOOTwfqQlYzU68runByLM_7af-/exec"; // ضع رابط السكربت هنا
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzrbYYHcrobMwAue3x2ZmG3KVnFoUxodBZN0Z-Hk_MgUVWDRKAq7-MngZkVawIBghdu/exec"; // ضع رابط السكربت هنا
 
 const axios = require('axios');
 
@@ -549,6 +557,39 @@ console.log('LOGIN OK:', res.data);
     return bot.sendMessage(chatId, '🔹 أدخل اسم المستخدم أو رقم الهوية:');
   }
   */
+
+  if (text === '👥 إدارة طلاب الحلقة') {
+
+  // 1️⃣ تأكد أن المستخدم معلم
+  const res = await axios.post(SCRIPT_URL, {
+    action: 'checkTeacher',
+    telegram_id: chatId
+  });
+
+  if (!res.data.isTeacher) {
+    return bot.sendMessage(chatId, '❌ هذا الخيار مخصص للمعلمين فقط');
+  }
+
+  // 2️⃣ خزّن حالة إدارة الطلاب
+  userStates[chatId] = {
+    waiting: 'manage_students'
+  };
+
+  return bot.sendMessage(
+    chatId,
+    '👥 إدارة طلاب الحلقة:',
+    {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: '➕ إضافة طالب', callback_data: 'add_student' }],
+          [{ text: '➖ حذف طالب', callback_data: 'remove_student' }],
+          [{ text: '❌ إغلاق', callback_data: 'close_manage_students' }]
+        ]
+      }
+    }
+  );
+}
+
 
 
 
@@ -1351,7 +1392,132 @@ if (q.data.startsWith('select_teacher:')) {
   );
 }
 
-  
+  if (data === 'add_student') {
+
+  // جلب الطلاب غير المضافين
+  const res = await axios.post(SCRIPT_URL, {
+    action: 'getAvailableStudents'
+  });
+
+  const students = res.data.students || [];
+
+  if (students.length === 0) {
+    return bot.answerCallbackQuery(q.id, {
+      text: 'لا يوجد طلاب متاحون',
+      show_alert: true
+    });
+  }
+
+  // خزّن الحالة
+  userStates[chatId] = {
+    waiting: 'add_students',
+    selectedStudents: new Set(),
+    studentsList: students
+  };
+
+  // إنشاء الأزرار
+  const keyboard = students.map(s => ([
+    {
+      text: `⬜ ${s.full_name}`,
+      callback_data: `toggle_student:${s.user_id}`
+    }
+  ]));
+
+  keyboard.push(
+    [{ text: '✅ تأكيد الإضافة', callback_data: 'confirm_add_students' }],
+    [{ text: '❌ إلغاء', callback_data: 'cancel_add_students' }]
+  );
+
+  return bot.editMessageText(
+    '👥 اختر الطلاب لإضافتهم إلى الحلقة:',
+    {
+      chat_id: chatId,
+      message_id: q.message.message_id,
+      reply_markup: { inline_keyboard: keyboard }
+    }
+  );
+}
+
+
+    if (data.startsWith('toggle_student:')) {
+
+  const studentId = data.split(':')[1];
+  const state = userStates[chatId];
+
+  if (!state || state.waiting !== 'add_students') return;
+
+  // toggle
+  if (state.selectedStudents.has(studentId)) {
+    state.selectedStudents.delete(studentId);
+  } else {
+    state.selectedStudents.add(studentId);
+  }
+
+  // إعادة بناء الأزرار
+  const keyboard = state.studentsList.map(s => {
+    const selected = state.selectedStudents.has(String(s.user_id));
+    return [{
+      text: `${selected ? '✅' : '⬜'} ${s.full_name}`,
+      callback_data: `toggle_student:${s.user_id}`
+    }];
+  });
+
+  keyboard.push(
+    [{ text: '✅ تأكيد الإضافة', callback_data: 'confirm_add_students' }],
+    [{ text: '❌ إلغاء', callback_data: 'cancel_add_students' }]
+  );
+
+  return bot.editMessageReplyMarkup(
+    { inline_keyboard: keyboard },
+    {
+      chat_id: chatId,
+      message_id: q.message.message_id
+    }
+  );
+}
+
+
+      if (data === 'confirm_add_students') {
+
+  const state = userStates[chatId];
+
+  if (!state || state.selectedStudents.size === 0) {
+    return bot.answerCallbackQuery(q.id, {
+      text: 'لم يتم اختيار أي طالب',
+      show_alert: true
+    });
+  }
+
+  // إرسال الطلاب المختارين للسيرفر
+  await axios.post(SCRIPT_URL, {
+    action: 'addStudentsToHalaqa',
+    student_ids: Array.from(state.selectedStudents),
+    telegram_id: chatId
+  });
+
+  delete userStates[chatId];
+
+  return bot.editMessageText(
+    '✅ تم إضافة الطلاب بنجاح',
+    {
+      chat_id: chatId,
+      message_id: q.message.message_id
+    }
+  );
+}
+if (data === 'cancel_add_students') {
+  delete userStates[chatId];
+
+  return bot.editMessageText(
+    '❎ تم إلغاء العملية',
+    {
+      chat_id: chatId,
+      message_id: q.message.message_id
+    }
+  );
+}
+
+
 
   /*
 
@@ -1722,6 +1888,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
