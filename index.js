@@ -1516,7 +1516,7 @@ userStates[chatId] = {
     }
   );
 }
-if (data === 'cancel_add_students') {
+if (data === 'close_manage_students') {
   delete userStates[chatId];
 
   return bot.editMessageText(
@@ -1899,6 +1899,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
