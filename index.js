@@ -1430,11 +1430,22 @@ userStates[chatId] = {
 
   return bot.editMessageText(
     '👥 اختر الطلاب لإضافتهم إلى الحلقة:',
+       {
+           chat_id: chatId,
+      message_id: q.message.message_id,
+      reply_markup: {
+        inline_keyboard: keyboard
+      }
+    }
+
+    /*
     {
       chat_id: chatId,
       message_id: q.message.message_id,
-      reply_markup: { inline_keyboard: keyboard }
+    
+   //   reply_markup: { inline_keyboard: keyboard }
     }
+    */
   );
 }
 
@@ -1888,6 +1899,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
