@@ -1392,7 +1392,7 @@ if (q.data.startsWith('select_teacher:')) {
 //   studentsList: [] // قائمة الطلاب المعروضة
 // };
 
-
+/*
 
   // جلب الطلاب غير المضافين
   const res = await axios.post(SCRIPT_URL, {
@@ -1427,9 +1427,11 @@ if (q.data.startsWith('select_teacher:')) {
     [{ text: '✅ تأكيد الإضافة', callback_data: 'confirm_add_students' }],
     [{ text: '❌ إلغاء', callback_data: 'cancel_add_students' }]
   );
+    */
 
   return bot.editMessageText(
     '👥 اختر الطلاب لإضافتهم إلى الحلقة:',
+    /*
        {
       //      chat_id: chatId,
       // message_id: q.message.message_id,
@@ -1437,6 +1439,7 @@ if (q.data.startsWith('select_teacher:')) {
         inline_keyboard: keyboard
       }
     }
+    */
 
     /*
     {
@@ -1899,6 +1902,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
