@@ -1386,11 +1386,11 @@ if (q.data.startsWith('select_teacher:')) {
 }
 
   if (data === 'add_student') {
-userStates[chatId] = {
-  waiting: 'add_students',
-  selectedStudents: new Set(),
-  studentsList: [] // قائمة الطلاب المعروضة
-};
+// userStates[chatId] = {
+//   waiting: 'add_students',
+//   selectedStudents: new Set(),
+//   studentsList: [] // قائمة الطلاب المعروضة
+// };
 
 
 
@@ -1899,6 +1899,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
