@@ -421,15 +421,15 @@ try {
   
  const fromId = msg.from.id;
 
+
+
+  // النص المعتمد
+  if (text === 'ربط المجموعة بحلقتي'){
   // نتحقق أنها مجموعة
   if (
     msg.chat.type !== 'group' &&
     msg.chat.type !== 'supergroup'
   ) return;
-
-  // النص المعتمد
-  if (text !== 'ربط المجموعة بحلقتي') return;
-
   // تحقق أن المرسل معلم
   const res = await axios.post(SCRIPT_URL, {
     action: 'linkHalaqaGroup',
@@ -445,6 +445,7 @@ try {
     chatId,
     '✅ تم ربط المجموعة بالحَلْقة بنجاح'
   );
+  }
   // 1️⃣ إذا المستخدم في مرحلة تسجيل الدخول، نتخطى التحقق من الجلسة
   if (!s.waiting || s.waiting === 'login_username' || s.waiting === 'login_password') {
 
@@ -1721,6 +1722,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
