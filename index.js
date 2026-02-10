@@ -1433,7 +1433,7 @@ if (q.data.startsWith('select_teacher:')) {
     
 
   return bot.editMessageText(
-    '👥 اختر الطلاب لإضافتهم إلى الحلقة:' $student,
+    '👥 اختر الطلاب لإضافتهم إلى الحلقة:' +student,
     //  { inline_keyboard: keyboard},
     {
       reply_markup: {
@@ -1919,6 +1919,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
