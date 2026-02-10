@@ -1392,7 +1392,7 @@ if (q.data.startsWith('select_teacher:')) {
 //   studentsList: [] // قائمة الطلاب المعروضة
 // };
 
-
+/*
 
   // جلب الطلاب غير المضافين
   const res = await axios.post(SCRIPT_URL, {
@@ -1414,6 +1414,7 @@ if (q.data.startsWith('select_teacher:')) {
     selectedStudents: new Set(),
     studentsList: students
   };
+    */
 
   // إنشاء الأزرار
   const keyboard = [];
@@ -1918,6 +1919,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
