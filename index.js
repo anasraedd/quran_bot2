@@ -1416,12 +1416,14 @@ if (q.data.startsWith('select_teacher:')) {
   };
 
   // إنشاء الأزرار
-  const keyboard = students.map(s => ([
+  const keyboard = [];
+    /*students.map(s => ([
     {
       text: `⬜ ${s.full_name}`,
       callback_data: `toggle_student:${s.user_id}`
     }
   ]));
+  */
 
   keyboard.push(
     [{ text: '✅ تأكيد الإضافة', callback_data: 'confirm_add_students' }],
@@ -1916,6 +1918,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
