@@ -1392,7 +1392,7 @@ if (q.data.startsWith('select_teacher:')) {
 //   studentsList: [] // قائمة الطلاب المعروضة
 // };
 
-/*
+
 
   // جلب الطلاب غير المضافين
   const res = await axios.post(SCRIPT_URL, {
@@ -1414,17 +1414,17 @@ if (q.data.startsWith('select_teacher:')) {
     selectedStudents: new Set(),
     studentsList: students
   };
-    */
+    
 
   // إنشاء الأزرار
-  const keyboard = [];
-    /*students.map(s => ([
+  const keyboard = 
+    students.map(s => ([
     {
       text: `⬜ ${s.full_name}`,
       callback_data: `toggle_student:${s.user_id}`
     }
   ]));
-  */
+  
 
   keyboard.push(
     [{ text: '✅ تأكيد الإضافة', callback_data: 'confirm_add_students' }],
@@ -1433,7 +1433,7 @@ if (q.data.startsWith('select_teacher:')) {
     
 
   return bot.editMessageText(
-    '👥 اختر الطلاب لإضافتهم إلى الحلقة:',
+    '👥 اختر الطلاب لإضافتهم إلى الحلقة:' $student,
     //  { inline_keyboard: keyboard},
     {
       reply_markup: {
@@ -1919,6 +1919,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
