@@ -1437,7 +1437,7 @@ if (q.data.startsWith('select_teacher:')) {
       message_id: q.message.message_id,
      
       }
-    }
+    
     /*
        {
       //      chat_id: chatId,
@@ -1909,6 +1909,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
