@@ -1433,10 +1433,17 @@ if (q.data.startsWith('select_teacher:')) {
     '👥 اختر الطلاب لإضافتهم إلى الحلقة:',
     //  { inline_keyboard: keyboard},
     {
+      reply_markup: {
+         inline_keyboard: keyboard
+      }
+    }
+    /*
+    {
       chat_id: chatId,
       message_id: q.message.message_id,
      
       }
+    */
     
     /*
        {
@@ -1909,6 +1916,7 @@ ${a.notes}
 
 */
 console.log('✅ البوت يعمل بشكل سليم');
+
 
 
 
